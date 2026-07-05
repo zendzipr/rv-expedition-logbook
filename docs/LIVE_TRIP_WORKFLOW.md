@@ -139,6 +139,8 @@ Export a bundle of the trip binder outputs and notes:
 
 ```bash
 python3 -m rv_logbook trip-export-bundle blue-ridge-test --base-dir data
+python3 -m rv_logbook trip-export-bundle blue-ridge-test --mode current --base-dir data
+python3 -m rv_logbook trip-export-bundle blue-ridge-test --mode final --base-dir data
 ```
 
 ## Database

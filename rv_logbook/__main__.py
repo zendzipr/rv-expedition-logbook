@@ -170,6 +170,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     export_bundle_parser = subparsers.add_parser("trip-export-bundle", help="package trip binder outputs and notes into a zip bundle")
     export_bundle_parser.add_argument("trip_slug", help="trip workspace slug")
+    export_bundle_parser.add_argument("--mode", choices=["full", "current", "final"], default="full", help="which bundle variant to export")
     export_bundle_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     render_html_parser = subparsers.add_parser("render-html", help="render an HTML trip report from trip JSON")
@@ -550,9 +551,9 @@ def render_final_binder_html_command(trip_slug: str, base_dir: str = "data") -> 
     return 0
 
 
-def trip_export_bundle_command(trip_slug: str, base_dir: str = "data") -> int:
+def trip_export_bundle_command(trip_slug: str, base_dir: str = "data", mode: str = "full") -> int:
     try:
-        output_path = export_trip_bundle(Path(base_dir), trip_slug)
+        output_path = export_trip_bundle(Path(base_dir), trip_slug, mode=mode)
     except LiveTripError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -748,7 +749,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "render-final-binder-html":
         return render_final_binder_html_command(args.trip_slug, args.base_dir)
     if args.command == "trip-export-bundle":
-        return trip_export_bundle_command(args.trip_slug, args.base_dir)
+        return trip_export_bundle_command(args.trip_slug, args.base_dir, args.mode)
     if args.command == "render-html":
         return render_html_command(args.input, args.output)
     if args.command == "validate":

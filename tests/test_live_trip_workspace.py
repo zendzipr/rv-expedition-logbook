@@ -940,6 +940,100 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         self.assertIn("output/final-binder.md", names)
         self.assertIn("output/final-binder.html", names)
 
+    def test_trip_export_bundle_current_mode_excludes_final_outputs(self):
+        import zipfile
+
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        commands = [
+            ["add-daily-review", "blue-ridge-test", "Day 1 wrap-up", "Beautiful drive, good campground, and slower mountain miles than planned.", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+            ["render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            ["render-current-binder-html", "blue-ridge-test", "--base-dir", str(base_dir)],
+            ["add-final-reflection", "blue-ridge-test", "Loved the Blue Ridge stretch and would stay longer next time.", "--base-dir", str(base_dir)],
+            ["finalize-trip", "blue-ridge-test", "--base-dir", str(base_dir)],
+            ["render-final-binder-html", "blue-ridge-test", "--base-dir", str(base_dir)],
+        ]
+        for args in commands:
+            result = subprocess.run([sys.executable, "-m", "rv_logbook", *args], cwd=root, text=True, capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        bundle = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "trip-export-bundle", "blue-ridge-test", "--mode", "current", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(bundle.returncode, 0, bundle.stdout + bundle.stderr)
+        bundle_path = trip_dir / "output" / "trip-binder-current.zip"
+        self.assertTrue(bundle_path.exists())
+
+        with zipfile.ZipFile(bundle_path) as archive:
+            names = set(archive.namelist())
+        self.assertIn("output/current-binder.md", names)
+        self.assertIn("output/current-binder.html", names)
+        self.assertNotIn("output/final-binder.md", names)
+        self.assertNotIn("output/final-binder.html", names)
+
+    def test_trip_export_bundle_final_mode_includes_only_final_outputs(self):
+        import zipfile
+
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        commands = [
+            ["add-daily-review", "blue-ridge-test", "Day 1 wrap-up", "Beautiful drive, good campground, and slower mountain miles than planned.", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+            ["render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            ["render-current-binder-html", "blue-ridge-test", "--base-dir", str(base_dir)],
+            ["add-final-reflection", "blue-ridge-test", "Loved the Blue Ridge stretch and would stay longer next time.", "--base-dir", str(base_dir)],
+            ["finalize-trip", "blue-ridge-test", "--base-dir", str(base_dir)],
+            ["render-final-binder-html", "blue-ridge-test", "--base-dir", str(base_dir)],
+        ]
+        for args in commands:
+            result = subprocess.run([sys.executable, "-m", "rv_logbook", *args], cwd=root, text=True, capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        bundle = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "trip-export-bundle", "blue-ridge-test", "--mode", "final", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(bundle.returncode, 0, bundle.stdout + bundle.stderr)
+        bundle_path = trip_dir / "output" / "trip-binder-final.zip"
+        self.assertTrue(bundle_path.exists())
+
+        with zipfile.ZipFile(bundle_path) as archive:
+            names = set(archive.namelist())
+        self.assertIn("output/final-binder.md", names)
+        self.assertIn("output/final-binder.html", names)
+        self.assertNotIn("output/current-binder.md", names)
+        self.assertNotIn("output/current-binder.html", names)
+
     def test_render_current_binder_writes_workspace_output(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

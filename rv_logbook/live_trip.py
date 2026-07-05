@@ -628,16 +628,32 @@ def render_final_binder_html(base_dir: Path, trip_slug: str) -> Path:
     return output_path
 
 
-def export_trip_bundle(base_dir: Path, trip_slug: str) -> Path:
+def export_trip_bundle(base_dir: Path, trip_slug: str, mode: str = "full") -> Path:
     paths = require_workspace(base_dir, trip_slug)
-    bundle_path = paths["output"] / "trip-binder-bundle.zip"
+    bundle_name = {
+        "full": "trip-binder-bundle.zip",
+        "current": "trip-binder-current.zip",
+        "final": "trip-binder-final.zip",
+    }.get(mode)
+    if not bundle_name:
+        raise LiveTripError(f"unknown export mode '{mode}'")
+    bundle_path = paths["output"] / bundle_name
     bundle_path.parent.mkdir(parents=True, exist_ok=True)
 
     with zipfile.ZipFile(bundle_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         archive.write(paths["trip_json"], arcname="trip.json")
         for note_file in sorted(paths["notes"].glob("*.md")):
             archive.write(note_file, arcname=f"notes/{note_file.name}")
-        for output_file in sorted(paths["output"].glob("*.md")) + sorted(paths["output"].glob("*.html")):
+
+        output_files: list[Path] = []
+        if mode in {"full", "current"}:
+            output_files.extend(sorted(paths["output"].glob("current-binder.md")))
+            output_files.extend(sorted(paths["output"].glob("current-binder.html")))
+        if mode in {"full", "final"}:
+            output_files.extend(sorted(paths["output"].glob("final-binder.md")))
+            output_files.extend(sorted(paths["output"].glob("final-binder.html")))
+
+        for output_file in output_files:
             if output_file.name == bundle_path.name:
                 continue
             archive.write(output_file, arcname=f"output/{output_file.name}")
