@@ -17,6 +17,12 @@
 - Add deterministic rule checks
 - Add more examples
 
+## Sprint 2.1: Typed domain layer
+
+- Add `Trip` and `TravelDay` Python domain objects
+- Move derived trip totals and formatting helpers out of the renderer
+- Refactor Markdown rendering to use the domain layer
+
 ## Sprint 1.5: First working renderer
 
 - Generate a Markdown binder from `examples/sample-trip.json`

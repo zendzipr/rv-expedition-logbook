@@ -10,6 +10,7 @@ This repository contains reusable project assets:
 
 - Hermes skill instructions
 - Domain documentation
+- Typed Python domain objects
 - JSON Schemas
 - Markdown binder templates
 - Example non-personal data
@@ -21,6 +22,7 @@ Personal travel history does **not** belong in this repository. Real trips, jour
 
 ```text
 docs/                         project design documents
+rv_logbook/                   Python package, CLI, domain objects, renderer, validation
 skills/rv-expedition-logbook/ Hermes skill and supporting references
 schemas/                      JSON Schemas for core domain objects
 templates/binder/             Markdown binder page templates
