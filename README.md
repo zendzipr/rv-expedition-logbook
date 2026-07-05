@@ -45,10 +45,20 @@ python3 -m unittest discover -s tests
 ## Generate the sample binder
 
 ```bash
+python3 -m rv_logbook render examples/sample-trip.json examples/sample-binder.md
+```
+
+The legacy script wrapper also works:
+
+```bash
 python3 scripts/render_binder.py examples/sample-trip.json examples/sample-binder.md
 ```
 
 This reads the sanitized sample trip and renders a Markdown binder from the templates in `templates/binder/`.
+
+## Continuous integration
+
+GitHub Actions runs validation, unit tests, and sample binder rendering on pushes and pull requests to `main`.
 
 ## Current milestone
 

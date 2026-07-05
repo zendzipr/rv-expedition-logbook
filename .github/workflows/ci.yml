@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Validate repository assets
+        run: python3 scripts/validate.py
+
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests
+
+      - name: Render sample binder
+        run: python3 -m rv_logbook render examples/sample-trip.json output/sample-binder.md
+
+      - name: Verify rendered binder exists
+        run: test -s output/sample-binder.md

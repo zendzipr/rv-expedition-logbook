@@ -5,6 +5,12 @@ The first working end-to-end slice of the project is Markdown binder generation.
 ## Command
 
 ```bash
+python3 -m rv_logbook render examples/sample-trip.json examples/sample-binder.md
+```
+
+The compatibility wrapper remains available:
+
+```bash
 python3 scripts/render_binder.py examples/sample-trip.json examples/sample-binder.md
 ```
 
