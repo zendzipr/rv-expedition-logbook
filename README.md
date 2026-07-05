@@ -1,8 +1,8 @@
 # RV Expedition Logbook
 
-RV Expedition Logbook is a knowledge-first RV travel logging system.
+RV Expedition Logbook is a binder-first RV trip system.
 
-It is not just a printable binder. The binder is one generated output from a structured travel knowledge model that can also produce Markdown reports, HTML pages, dashboards, statistics, and future mobile or web experiences.
+The primary job of the project is to help you maintain a **live trip binder during the trip** and then generate a **final trip binder after the trip** from the same structured data.
 
 ## What lives in this repository
 
@@ -15,6 +15,7 @@ This repository contains reusable project assets:
 - Markdown binder templates
 - Example non-personal data
 - Validation scripts and tests
+- A binder-first live trip workflow
 
 Personal travel history does **not** belong in this repository. Real trips, journals, ratings, expenses, and private notes belong in Hermes/Hindsight or another user-owned data store.
 
@@ -23,6 +24,7 @@ Personal travel history does **not** belong in this repository. Real trips, jour
 ```text
 docs/                         project design documents
 rv_logbook/                   Python package, CLI, domain objects, renderer, validation
+data/trips/                   one folder per trip for evolving live-trip data
 skills/rv-expedition-logbook/ Hermes skill and supporting references
 schemas/                      JSON Schemas for core domain objects
 templates/binder/             Markdown binder page templates
@@ -33,9 +35,9 @@ tests/                        lightweight validation tests
 
 ## Core principle
 
-Capture once. Reuse everywhere.
+Binder first. Keep one live trip workspace, update it as the trip unfolds, and generate the current binder snapshot or the final binder whenever needed.
 
-A fuel stop, campground rating, travel-day note, or maintenance event should be captured once as structured knowledge and then reused in binders, reports, statistics, recommendations, and future interfaces.
+A fuel stop, campground rating, travel-day note, maintenance event, meal, or reflection should be captured once and reused in the live binder and the final binder.
 
 ## Validate
 

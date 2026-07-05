@@ -1,6 +1,6 @@
 # Roadmap
 
-## Sprint 1: Foundation
+## Step 1: Foundation
 
 - Project overview and architecture documents
 - Initial domain model
@@ -10,55 +10,43 @@
 - Safe sample data
 - Validation script
 
-## Sprint 2: Domain depth
+## Step 2: Domain depth
 
 - Expand schemas
 - Add provenance and confidence model
 - Add deterministic rule checks
 - Add more examples
 
-## Sprint 2.1: Typed domain layer
+## Step 2.1: Typed domain layer
 
 - Add `Trip` and `TravelDay` Python domain objects
 - Move derived trip totals and formatting helpers out of the renderer
 - Refactor Markdown rendering to use the domain layer
 
-## Sprint 1.5: First working renderer
+## Step 3: Import and merge workflows
 
-- Generate a Markdown binder from `examples/sample-trip.json`
-- Commit a sanitized generated example at `examples/sample-binder.md`
-- Keep the renderer dependency-free for easy first use
+- CSV import for fuel stops and expenses
+- Merge imported records into trips
+- Add append/replace merge modes
+- Add higher-level ingest workflow
+- Add RV Trip Wizard connector scaffold
 
-## Sprint 3: Hermes workflow
-
-- Refine capture flows
-- Add follow-up question patterns
-- Add import triage workflow
-- Add private data handling guidance
-
-## Sprint 4: Connectors
-
-- RV Trip Wizard import mapping
-- CSV import format
-- GPX route import notes
-
-## Sprint 5: Renderers
+## Step 4: Multi-format binder output
 
 - Markdown binder generation
 - HTML report generation
-- PDF pipeline exploration
+- Sample generated artifacts
 
-## Sprint 6: Analysis
+## Step 5: Live trip workflow
 
-- Fuel economy summaries
-- Cost summaries
-- Campground comparison
-- Annual review reports
+- Per-trip workspace under `data/trips/`
+- Current binder snapshot generation during travel
+- Final binder generation after travel
+- Question-driven enrichment of imported trip data
 
-## Future
+## Later
 
-- Website
-- Mobile companion
-- Recommendation engine
-- Knowledge graph storage
-- Generalized expedition-logbook framework for sailing, overlanding, hiking, and other travel domains
+- richer RV Trip Wizard format support
+- PDF output if needed
+- stronger trip-editing UX
+- optional stats and reporting only where they directly help the binder

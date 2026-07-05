@@ -1,24 +1,26 @@
 # Project Charter
 
 ## Mission
-Build an open-source RV travel knowledge platform powered by structured data and capable of generating printable expedition logbooks, reports, and future digital experiences.
+Build an open-source RV trip binder system powered by structured data and capable of generating useful live and final trip binders.
 
 ## Core Principles
-- Conversation before forms.
-- Capture once, reuse everywhere.
-- User travel data belongs in Hermes/Hindsight, not this repository.
-- This repository contains schemas, templates, documentation, renderers, and the Hermes skill.
+- Binder first.
+- Keep one evolving workspace per trip.
+- Capture once, reuse in the current binder and the final binder.
+- User travel data belongs in Hermes/Hindsight or private data folders, not public examples.
+- This repository contains schemas, templates, documentation, renderers, workflows, and the Hermes skill.
 - Markdown is the canonical documentation format.
 
 ## Scope
 - Domain model
 - Hermes RV skill
 - Import connectors
-- Printable binder templates
+- Live binder workflows
+- Final binder templates
 - Rendering engine
 - Example data
 
 ## Out of Scope
-- Hosting user travel data
-- Proprietary cloud services
+- Hosting user travel data as a public cloud service
 - Vendor lock-in
+- Unnecessary platform abstractions that do not help the binder workflow
