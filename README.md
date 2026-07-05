@@ -110,6 +110,8 @@ python3 -m rv_logbook add-meal <trip-slug> "12 Bones Smokehouse" "Asheville, NC"
 python3 -m rv_logbook add-fuel-stop <trip-slug> Pilot "Asheville, NC" 42.5 165.75 12345 --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 python3 -m rv_logbook add-stop <trip-slug> "Biltmore Estate" "Asheville, NC" "Great detour and worth the ticket price." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 python3 -m rv_logbook add-campground-review <trip-slug> "Sample Campground" "Site 12" 4.5 yes "Quiet site, strong hookups, would gladly return." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+python3 -m rv_logbook add-travel-day-note <trip-slug> "Rainy mountain driving" "Heavy fog and steep grades made the day slower than expected." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+python3 -m rv_logbook add-mileage-note <trip-slug> "Mountain segment" 210 "Slow climbing miles with lower fuel economy than normal." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 python3 -m rv_logbook trip-questions <trip-slug> --base-dir data
 python3 -m rv_logbook add-final-reflection <trip-slug> "Loved the Blue Ridge stretch and would stay longer next time." --base-dir data
 python3 -m rv_logbook finalize-trip <trip-slug> --base-dir data

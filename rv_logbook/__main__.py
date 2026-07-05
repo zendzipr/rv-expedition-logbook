@@ -11,7 +11,9 @@ from .live_trip import (
     add_final_reflection,
     add_fuel_stop,
     add_meal,
+    add_mileage_note,
     add_stop,
+    add_travel_day_note,
     add_trip_entry,
     add_trip_note,
     create_live_trip,
@@ -94,6 +96,23 @@ def build_parser() -> argparse.ArgumentParser:
     add_campground_parser.add_argument("--date", dest="occurred_on", help="optional review date in YYYY-MM-DD form")
     add_campground_parser.add_argument("--travel-day-id", help="optional related travel day id")
     add_campground_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_travel_parser = subparsers.add_parser("add-travel-day-note", help="capture a travel-day note in binder-friendly form")
+    add_travel_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_travel_parser.add_argument("title", help="travel note title")
+    add_travel_parser.add_argument("notes", help="travel note details")
+    add_travel_parser.add_argument("--date", dest="occurred_on", help="optional travel-day date in YYYY-MM-DD form")
+    add_travel_parser.add_argument("--travel-day-id", help="optional related travel day id")
+    add_travel_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_mileage_parser = subparsers.add_parser("add-mileage-note", help="capture a mileage note in binder-friendly form")
+    add_mileage_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_mileage_parser.add_argument("title", help="mileage note title")
+    add_mileage_parser.add_argument("miles", help="miles for this note")
+    add_mileage_parser.add_argument("notes", help="mileage note details")
+    add_mileage_parser.add_argument("--date", dest="occurred_on", help="optional mileage date in YYYY-MM-DD form")
+    add_mileage_parser.add_argument("--travel-day-id", help="optional related travel day id")
+    add_mileage_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
     questions_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -318,6 +337,56 @@ def add_campground_review_command(
     return 0
 
 
+def add_travel_day_note_command(
+    trip_slug: str,
+    title: str,
+    notes: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
+    try:
+        add_travel_day_note(
+            Path(base_dir),
+            trip_slug,
+            title,
+            notes,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added travel-day note: {title}")
+    return 0
+
+
+def add_mileage_note_command(
+    trip_slug: str,
+    title: str,
+    miles: str,
+    notes: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
+    try:
+        add_mileage_note(
+            Path(base_dir),
+            trip_slug,
+            title,
+            miles,
+            notes,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added mileage note: {title}")
+    return 0
+
+
 def trip_questions_command(trip_slug: str, base_dir: str = "data") -> int:
     try:
         questions = follow_up_questions(Path(base_dir), trip_slug)
@@ -498,6 +567,25 @@ def main(argv: list[str] | None = None) -> int:
             args.site,
             args.rating,
             args.would_return,
+            args.notes,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
+    if args.command == "add-travel-day-note":
+        return add_travel_day_note_command(
+            args.trip_slug,
+            args.title,
+            args.notes,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
+    if args.command == "add-mileage-note":
+        return add_mileage_note_command(
+            args.trip_slug,
+            args.title,
+            args.miles,
             args.notes,
             args.base_dir,
             args.occurred_on,

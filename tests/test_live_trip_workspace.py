@@ -412,6 +412,110 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         self.assertIn("Rating: 4.5/5", binder)
         self.assertIn("Would return: yes", binder)
 
+    def test_add_travel_day_note_command_creates_binder_friendly_travel_entry(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        travel = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-travel-day-note",
+                "blue-ridge-test",
+                "Rainy mountain driving",
+                "Heavy fog and steep grades made the day slower than expected.",
+                "--date",
+                "2026-05-01",
+                "--travel-day-id",
+                "stop-001",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(travel.returncode, 0, travel.stdout + travel.stderr)
+
+        render = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
+        binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
+        self.assertIn("# Travel Notes", binder)
+        self.assertIn("Rainy mountain driving", binder)
+        self.assertIn("Heavy fog and steep grades", binder)
+
+    def test_add_mileage_note_command_creates_binder_friendly_mileage_entry(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        mileage = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-mileage-note",
+                "blue-ridge-test",
+                "Mountain segment",
+                "210",
+                "Slow climbing miles with lower fuel economy than normal.",
+                "--date",
+                "2026-05-01",
+                "--travel-day-id",
+                "stop-001",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(mileage.returncode, 0, mileage.stdout + mileage.stderr)
+
+        render = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
+        binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
+        self.assertIn("# Fuel & Mileage", binder)
+        self.assertIn("Mountain segment", binder)
+        self.assertIn("Miles: 210", binder)
+        self.assertIn("lower fuel economy", binder)
+
     def test_current_binder_groups_entries_into_binder_sections(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

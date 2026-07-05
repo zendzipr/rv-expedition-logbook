@@ -285,6 +285,46 @@ def add_campground_review(
     )
 
 
+def add_travel_day_note(
+    base_dir: Path,
+    trip_slug: str,
+    title: str,
+    notes: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
+    add_trip_entry(
+        base_dir,
+        trip_slug,
+        "travel",
+        title,
+        notes,
+        occurred_on=occurred_on,
+        travel_day_id=travel_day_id,
+    )
+
+
+def add_mileage_note(
+    base_dir: Path,
+    trip_slug: str,
+    title: str,
+    miles: str,
+    notes: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
+    content = f"Miles: {miles}\n\n{notes}"
+    add_trip_entry(
+        base_dir,
+        trip_slug,
+        "mileage",
+        title,
+        content,
+        occurred_on=occurred_on,
+        travel_day_id=travel_day_id,
+    )
+
+
 def add_final_reflection(base_dir: Path, trip_slug: str, content: str) -> None:
     paths = require_workspace(base_dir, trip_slug)
     conn = sqlite3.connect(paths["db"])
