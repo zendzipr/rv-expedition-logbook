@@ -110,7 +110,7 @@ Initial binder pages:
 
 ## Template Map
 
-Use the repository templates under `templates/binder/` as the canonical page layouts for binder outputs:
+Use the bundled skill templates under `templates/binder/` as the canonical page layouts for binder outputs:
 
 - `templates/binder/cover.md`
 - `templates/binder/trip-summary.md`
