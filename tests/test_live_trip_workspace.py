@@ -596,6 +596,77 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         self.assertIn("Day 1 wrap-up", binder)
         self.assertIn("Beautiful drive, good campground", binder)
 
+    def test_trip_daily_summary_reports_captured_items_for_a_date(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        commands = [
+            ["add-meal", "blue-ridge-test", "12 Bones Smokehouse", "Asheville, NC", "Best ribs of the trip.", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+            ["add-fuel-stop", "blue-ridge-test", "Pilot", "Asheville, NC", "42.5", "165.75", "12345", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+            ["add-daily-review", "blue-ridge-test", "Day 1 wrap-up", "Beautiful drive, good campground, and slower mountain miles than planned.", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+        ]
+        for args in commands:
+            result = subprocess.run([sys.executable, "-m", "rv_logbook", *args], cwd=root, text=True, capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        summary = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "trip-daily-summary", "blue-ridge-test", "2026-05-01", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(summary.returncode, 0, summary.stdout + summary.stderr)
+        self.assertIn("Daily summary for 2026-05-01", summary.stdout)
+        self.assertIn("12 Bones Smokehouse", summary.stdout)
+        self.assertIn("Pilot", summary.stdout)
+        self.assertIn("Day 1 wrap-up", summary.stdout)
+
+    def test_trip_daily_summary_reports_missing_sections_for_the_day(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        meal = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "add-meal", "blue-ridge-test", "12 Bones Smokehouse", "Asheville, NC", "Best ribs of the trip.", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(meal.returncode, 0, meal.stdout + meal.stderr)
+
+        summary = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "trip-daily-summary", "blue-ridge-test", "2026-05-01", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(summary.returncode, 0, summary.stdout + summary.stderr)
+        self.assertIn("Still missing for this day", summary.stdout)
+        self.assertIn("fuel stop or mileage note", summary.stdout)
+        self.assertIn("stop or attraction", summary.stdout)
+
     def test_current_binder_groups_entries_into_binder_sections(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

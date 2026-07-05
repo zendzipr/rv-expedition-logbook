@@ -419,6 +419,38 @@ def trip_checklist(base_dir: Path, trip_slug: str) -> list[str]:
     return items
 
 
+def trip_daily_summary(base_dir: Path, trip_slug: str, occurred_on: str) -> str:
+    paths = require_workspace(base_dir, trip_slug)
+    entries = [entry for entry in load_trip_entries(paths["db"]) if entry.get("occurred_on") == occurred_on]
+    lines = [f"Daily summary for {occurred_on}", ""]
+    if entries:
+        lines.append("Captured today:")
+        for entry in entries:
+            lines.append(f"- {entry['title']}")
+        lines.append("")
+    else:
+        lines.append("No structured entries recorded for this day yet.")
+        lines.append("")
+
+    have_types = {entry["entry_type"] for entry in entries}
+    missing: list[str] = []
+    if "meal" not in have_types:
+        missing.append("Add at least one meal")
+    if "fuel" not in have_types and "mileage" not in have_types:
+        missing.append("Add at least one fuel stop or mileage note")
+    if "stop" not in have_types:
+        missing.append("Add a stop or attraction")
+    if "campground" not in have_types:
+        missing.append("Add a campground review")
+    if "travel" not in have_types:
+        missing.append("Add a travel-day note")
+    if missing:
+        lines.append("Still missing for this day:")
+        for item in missing:
+            lines.append(f"- {item}")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def render_live_sections(db_path: Path) -> str:
     entries = load_trip_entries(db_path)
     if not entries:

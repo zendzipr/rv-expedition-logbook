@@ -22,6 +22,7 @@ from .live_trip import (
     follow_up_questions,
     render_current_binder,
     trip_checklist,
+    trip_daily_summary,
 )
 from .merge import MergeError, merge_record_files
 from .render import BinderRenderError, fail, load_json, render_binder
@@ -127,6 +128,11 @@ def build_parser() -> argparse.ArgumentParser:
     checklist_parser = subparsers.add_parser("trip-checklist", help="show what is still missing for the current trip binder")
     checklist_parser.add_argument("trip_slug", help="trip workspace slug")
     checklist_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    daily_summary_parser = subparsers.add_parser("trip-daily-summary", help="summarize the captured binder items for a specific day")
+    daily_summary_parser.add_argument("trip_slug", help="trip workspace slug")
+    daily_summary_parser.add_argument("date", help="date to summarize in YYYY-MM-DD form")
+    daily_summary_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
     questions_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -439,6 +445,16 @@ def trip_checklist_command(trip_slug: str, base_dir: str = "data") -> int:
     return 0
 
 
+def trip_daily_summary_command(trip_slug: str, date: str, base_dir: str = "data") -> int:
+    try:
+        summary = trip_daily_summary(Path(base_dir), trip_slug, date)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(summary, end="")
+    return 0
+
+
 def trip_questions_command(trip_slug: str, base_dir: str = "data") -> int:
     try:
         questions = follow_up_questions(Path(base_dir), trip_slug)
@@ -654,6 +670,8 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "trip-checklist":
         return trip_checklist_command(args.trip_slug, args.base_dir)
+    if args.command == "trip-daily-summary":
+        return trip_daily_summary_command(args.trip_slug, args.date, args.base_dir)
     if args.command == "trip-questions":
         return trip_questions_command(args.trip_slug, args.base_dir)
     if args.command == "add-final-reflection":

@@ -93,6 +93,12 @@ Show a quick checklist of what is still missing for the binder:
 python3 -m rv_logbook trip-checklist blue-ridge-test --base-dir data
 ```
 
+Generate a short summary of what was captured for a specific day:
+
+```bash
+python3 -m rv_logbook trip-daily-summary blue-ridge-test 2026-05-01 --base-dir data
+```
+
 Add a final reflection after the trip:
 
 ```bash

@@ -115,6 +115,7 @@ python3 -m rv_logbook add-mileage-note <trip-slug> "Mountain segment" 210 "Slow 
 python3 -m rv_logbook add-daily-review <trip-slug> "Day 1 wrap-up" "Beautiful drive, good campground, and slower mountain miles than planned." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 python3 -m rv_logbook trip-questions <trip-slug> --base-dir data
 python3 -m rv_logbook trip-checklist <trip-slug> --base-dir data
+python3 -m rv_logbook trip-daily-summary <trip-slug> 2026-05-01 --base-dir data
 python3 -m rv_logbook add-final-reflection <trip-slug> "Loved the Blue Ridge stretch and would stay longer next time." --base-dir data
 python3 -m rv_logbook finalize-trip <trip-slug> --base-dir data
 python3 -m rv_logbook render-current-binder <trip-slug> --base-dir data
