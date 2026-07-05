@@ -33,6 +33,12 @@ jobs:
       - name: Verify rendered binder exists
         run: test -s output/sample-binder.md
 
+      - name: Render sample HTML report
+        run: python3 -m rv_logbook render-html examples/sample-trip.json output/sample-report.html
+
+      - name: Verify rendered HTML report exists
+        run: test -s output/sample-report.html
+
       - name: Import sample fuel-stop CSV
         run: python3 -m rv_logbook import-csv fuel-stop examples/sample-fuel-stops.csv output/fuel-stops.json
 

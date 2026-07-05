@@ -7,6 +7,7 @@ from pathlib import Path
 from .importers import CsvImportError, import_csv, write_json
 from .merge import MergeError, merge_record_files
 from .render import BinderRenderError, fail, load_json, render_binder
+from .render_html import render_html
 from .schema import SchemaValidationError, validate_file, validate_repository
 
 
@@ -17,6 +18,10 @@ def build_parser() -> argparse.ArgumentParser:
     render_parser = subparsers.add_parser("render", help="render a Markdown binder from trip JSON")
     render_parser.add_argument("input", help="input trip JSON file")
     render_parser.add_argument("output", help="output Markdown file")
+
+    render_html_parser = subparsers.add_parser("render-html", help="render an HTML trip report from trip JSON")
+    render_html_parser.add_argument("input", help="input trip JSON file")
+    render_html_parser.add_argument("output", help="output HTML file")
 
     validate_parser = subparsers.add_parser("validate", help="validate a JSON file against a project schema")
     validate_parser.add_argument("input", help="input JSON file")
@@ -47,6 +52,19 @@ def render_command(input_path: str, output_path: str) -> int:
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(rendered, encoding="utf-8")
     print(f"Rendered binder: {destination}")
+    return 0
+
+
+def render_html_command(input_path: str, output_path: str) -> int:
+    trip = load_json(Path(input_path))
+    try:
+        rendered = render_html(trip)
+    except BinderRenderError as exc:
+        fail(str(exc))
+    destination = Path(output_path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(rendered, encoding="utf-8")
+    print(f"Rendered HTML report: {destination}")
     return 0
 
 
@@ -99,6 +117,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "render":
         return render_command(args.input, args.output)
+    if args.command == "render-html":
+        return render_html_command(args.input, args.output)
     if args.command == "validate":
         return validate_command(args.input, args.schema)
     if args.command == "import-csv":

@@ -67,9 +67,17 @@ python3 scripts/render_binder.py examples/sample-trip.json examples/sample-binde
 
 This reads the sanitized sample trip and renders a Markdown binder from the templates in `templates/binder/`.
 
+## Generate the sample HTML report
+
+```bash
+python3 -m rv_logbook render-html examples/sample-trip.json examples/sample-report.html
+```
+
+This renders the same structured trip data as a standalone HTML report.
+
 ## Continuous integration
 
-GitHub Actions installs the package, runs JSON Schema validation, runs unit tests, renders the sample binder, exercises the sample CSV import path, and verifies trip-record merging on pushes and pull requests to `main`.
+GitHub Actions installs the package, runs JSON Schema validation, runs unit tests, renders the sample binder, renders the sample HTML report, exercises the sample CSV import path, and verifies trip-record merging on pushes and pull requests to `main`.
 
 ## Current milestone
 
