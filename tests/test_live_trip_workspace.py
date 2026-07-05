@@ -173,6 +173,62 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         self.assertIn("What meals were memorable", questions.stdout)
         self.assertIn("Any memorable stops", questions.stdout)
 
+    def test_finalize_trip_generates_final_binder_and_marks_trip_complete(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        reflection = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-final-reflection",
+                "blue-ridge-test",
+                "Loved the Blue Ridge stretch and would stay longer next time.",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(reflection.returncode, 0, reflection.stdout + reflection.stderr)
+
+        finalize = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "finalize-trip", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(finalize.returncode, 0, finalize.stdout + finalize.stderr)
+
+        trip = json.loads((trip_dir / "trip.json").read_text(encoding="utf-8"))
+        self.assertEqual(trip.get("status"), "complete")
+        self.assertTrue((trip_dir / "output" / "final-binder.md").exists())
+        binder = (trip_dir / "output" / "final-binder.md").read_text(encoding="utf-8")
+        self.assertIn("Final Reflections", binder)
+        self.assertIn("Loved the Blue Ridge stretch", binder)
+
+        conn = sqlite3.connect(trip_dir / "trip.db")
+        try:
+            rows = conn.execute("select content from final_reflections order by id").fetchall()
+        finally:
+            conn.close()
+        self.assertEqual(rows[-1][0], "Loved the Blue Ridge stretch and would stay longer next time.")
+
     def test_render_current_binder_writes_workspace_output(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

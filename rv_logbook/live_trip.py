@@ -1,6 +1,7 @@
 """Live trip workspace helpers for binder-first trip management."""
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,7 +25,6 @@ NOTE_FILES = {
 }
 
 ENTRY_TYPES = {"meal", "stop", "campground", "travel", "fuel", "mileage", "general"}
-
 
 QUESTION_RULES = [
     ("meal", "What meals were memorable on this part of the trip?"),
@@ -83,6 +83,15 @@ def init_trip_db(db_path: Path) -> None:
               id integer primary key autoincrement,
               entry_type text not null,
               title text not null,
+              content text not null,
+              created_at text not null
+            )
+            """
+        )
+        conn.execute(
+            """
+            create table if not exists final_reflections (
+              id integer primary key autoincrement,
               content text not null,
               created_at text not null
             )
@@ -154,6 +163,19 @@ def add_trip_entry(base_dir: Path, trip_slug: str, entry_type: str, title: str, 
         conn.close()
 
 
+def add_final_reflection(base_dir: Path, trip_slug: str, content: str) -> None:
+    paths = require_workspace(base_dir, trip_slug)
+    conn = sqlite3.connect(paths["db"])
+    try:
+        conn.execute(
+            "insert into final_reflections(content, created_at) values (?, ?)",
+            (content, utc_now()),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def load_trip_entries(db_path: Path) -> list[tuple[str, str, str]]:
     conn = sqlite3.connect(db_path)
     try:
@@ -162,6 +184,15 @@ def load_trip_entries(db_path: Path) -> list[tuple[str, str, str]]:
         ).fetchall()
     finally:
         conn.close()
+
+
+def load_final_reflections(db_path: Path) -> list[str]:
+    conn = sqlite3.connect(db_path)
+    try:
+        rows = conn.execute("select content from final_reflections order by id").fetchall()
+    finally:
+        conn.close()
+    return [row[0] for row in rows]
 
 
 def follow_up_questions(base_dir: Path, trip_slug: str) -> list[str]:
@@ -189,12 +220,38 @@ def render_live_sections(db_path: Path) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def render_final_reflections(db_path: Path) -> str:
+    reflections = load_final_reflections(db_path)
+    if not reflections:
+        return ""
+    lines = ["", "# Final Reflections", ""]
+    for reflection in reflections:
+        lines.append(f"- {reflection}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def render_current_binder(base_dir: Path, trip_slug: str) -> Path:
     paths = require_workspace(base_dir, trip_slug)
     trip_data: dict[str, Any] = load_json(paths["trip_json"])
     binder = render_binder(trip_data)
     binder += render_live_sections(paths["db"])
     output_path = paths["output"] / "current-binder.md"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(binder, encoding="utf-8")
+    return output_path
+
+
+def finalize_trip(base_dir: Path, trip_slug: str) -> Path:
+    paths = require_workspace(base_dir, trip_slug)
+    trip_data: dict[str, Any] = load_json(paths["trip_json"])
+    trip_data["status"] = "complete"
+    paths["trip_json"].write_text(json.dumps(trip_data, indent=2) + "\n", encoding="utf-8")
+
+    binder = render_binder(trip_data)
+    binder += render_live_sections(paths["db"])
+    binder += render_final_reflections(paths["db"])
+    output_path = paths["output"] / "final-binder.md"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(binder, encoding="utf-8")
     return output_path

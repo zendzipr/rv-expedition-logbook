@@ -67,6 +67,18 @@ List follow-up questions the system still wants answered:
 python3 -m rv_logbook trip-questions blue-ridge-test --base-dir data
 ```
 
+Add a final reflection after the trip:
+
+```bash
+python3 -m rv_logbook add-final-reflection blue-ridge-test "Loved the Blue Ridge stretch and would stay longer next time." --base-dir data
+```
+
+Finalize the trip and generate the final binder:
+
+```bash
+python3 -m rv_logbook finalize-trip blue-ridge-test --base-dir data
+```
+
 Render the current binder snapshot:
 
 ```bash

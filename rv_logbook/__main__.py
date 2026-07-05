@@ -7,9 +7,11 @@ from pathlib import Path
 from .importers import CsvImportError, import_csv, write_json
 from .live_trip import (
     LiveTripError,
+    add_final_reflection,
     add_trip_entry,
     add_trip_note,
     create_live_trip,
+    finalize_trip,
     follow_up_questions,
     render_current_binder,
 )
@@ -50,6 +52,15 @@ def build_parser() -> argparse.ArgumentParser:
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
     questions_parser.add_argument("trip_slug", help="trip workspace slug")
     questions_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    reflection_parser = subparsers.add_parser("add-final-reflection", help="store a final reflection for a completed trip binder")
+    reflection_parser.add_argument("trip_slug", help="trip workspace slug")
+    reflection_parser.add_argument("content", help="final reflection text")
+    reflection_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    finalize_parser = subparsers.add_parser("finalize-trip", help="mark a trip complete and generate the final binder")
+    finalize_parser.add_argument("trip_slug", help="trip workspace slug")
+    finalize_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     render_current_parser = subparsers.add_parser("render-current-binder", help="render the current binder snapshot for a live trip workspace")
     render_current_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -144,6 +155,26 @@ def trip_questions_command(trip_slug: str, base_dir: str = "data") -> int:
         return 0
     for question in questions:
         print(question)
+    return 0
+
+
+def add_final_reflection_command(trip_slug: str, content: str, base_dir: str = "data") -> int:
+    try:
+        add_final_reflection(Path(base_dir), trip_slug, content)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added final reflection for {trip_slug}")
+    return 0
+
+
+def finalize_trip_command(trip_slug: str, base_dir: str = "data") -> int:
+    try:
+        output_path = finalize_trip(Path(base_dir), trip_slug)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Finalized trip binder: {output_path}")
     return 0
 
 
@@ -248,6 +279,10 @@ def main(argv: list[str] | None = None) -> int:
         return add_trip_entry_command(args.trip_slug, args.entry_type, args.title, args.content, args.base_dir)
     if args.command == "trip-questions":
         return trip_questions_command(args.trip_slug, args.base_dir)
+    if args.command == "add-final-reflection":
+        return add_final_reflection_command(args.trip_slug, args.content, args.base_dir)
+    if args.command == "finalize-trip":
+        return finalize_trip_command(args.trip_slug, args.base_dir)
     if args.command == "render-current-binder":
         return render_current_binder_command(args.trip_slug, args.base_dir)
     if args.command == "render-html":

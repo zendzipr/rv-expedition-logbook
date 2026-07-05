@@ -106,6 +106,8 @@ python3 -m rv_logbook create-live-trip <trip-slug> <rtw-export.json> --base-dir 
 python3 -m rv_logbook add-trip-note <trip-slug> meal "Great BBQ in Asheville." --base-dir data
 python3 -m rv_logbook add-trip-entry <trip-slug> meal "12 Bones Smokehouse" "Best ribs of the trip." --base-dir data
 python3 -m rv_logbook trip-questions <trip-slug> --base-dir data
+python3 -m rv_logbook add-final-reflection <trip-slug> "Loved the Blue Ridge stretch and would stay longer next time." --base-dir data
+python3 -m rv_logbook finalize-trip <trip-slug> --base-dir data
 python3 -m rv_logbook render-current-binder <trip-slug> --base-dir data
 ```
 
