@@ -21,6 +21,8 @@ from .live_trip import (
     finalize_trip,
     follow_up_questions,
     render_current_binder,
+    render_current_binder_html,
+    render_final_binder_html,
     trip_capture_prompts,
     trip_checklist,
     trip_daily_summary,
@@ -156,6 +158,14 @@ def build_parser() -> argparse.ArgumentParser:
     render_current_parser = subparsers.add_parser("render-current-binder", help="render the current binder snapshot for a live trip workspace")
     render_current_parser.add_argument("trip_slug", help="trip workspace slug")
     render_current_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    render_current_html_parser = subparsers.add_parser("render-current-binder-html", help="render the current binder snapshot as HTML for a live trip workspace")
+    render_current_html_parser.add_argument("trip_slug", help="trip workspace slug")
+    render_current_html_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    render_final_html_parser = subparsers.add_parser("render-final-binder-html", help="render the final binder as HTML for a live trip workspace")
+    render_final_html_parser.add_argument("trip_slug", help="trip workspace slug")
+    render_final_html_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     render_html_parser = subparsers.add_parser("render-html", help="render an HTML trip report from trip JSON")
     render_html_parser.add_argument("input", help="input trip JSON file")
@@ -515,6 +525,26 @@ def render_current_binder_command(trip_slug: str, base_dir: str = "data") -> int
     return 0
 
 
+def render_current_binder_html_command(trip_slug: str, base_dir: str = "data") -> int:
+    try:
+        output_path = render_current_binder_html(Path(base_dir), trip_slug)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Rendered current HTML binder: {output_path}")
+    return 0
+
+
+def render_final_binder_html_command(trip_slug: str, base_dir: str = "data") -> int:
+    try:
+        output_path = render_final_binder_html(Path(base_dir), trip_slug)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Rendered final HTML binder: {output_path}")
+    return 0
+
+
 def render_html_command(input_path: str, output_path: str) -> int:
     trip = load_json(Path(input_path))
     try:
@@ -698,6 +728,10 @@ def main(argv: list[str] | None = None) -> int:
         return finalize_trip_command(args.trip_slug, args.base_dir)
     if args.command == "render-current-binder":
         return render_current_binder_command(args.trip_slug, args.base_dir)
+    if args.command == "render-current-binder-html":
+        return render_current_binder_html_command(args.trip_slug, args.base_dir)
+    if args.command == "render-final-binder-html":
+        return render_final_binder_html_command(args.trip_slug, args.base_dir)
     if args.command == "render-html":
         return render_html_command(args.input, args.output)
     if args.command == "validate":

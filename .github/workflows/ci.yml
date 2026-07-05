@@ -71,3 +71,21 @@ jobs:
 
       - name: Verify ingested trip exists
         run: test -s output/ingested-trip.json
+
+      - name: Create sample live trip workspace
+        run: python3 -m rv_logbook create-live-trip ci-live-trip examples/sample-rtw-export.json --base-dir output/live
+
+      - name: Add sample live trip updates
+        run: |
+          python3 -m rv_logbook add-meal ci-live-trip "12 Bones Smokehouse" "Asheville, NC" "Best ribs of the trip." --date 2026-05-01 --travel-day-id stop-001 --base-dir output/live
+          python3 -m rv_logbook add-final-reflection ci-live-trip "Loved the Blue Ridge stretch and would stay longer next time." --base-dir output/live
+
+      - name: Render live trip HTML binders
+        run: |
+          python3 -m rv_logbook render-current-binder-html ci-live-trip --base-dir output/live
+          python3 -m rv_logbook render-final-binder-html ci-live-trip --base-dir output/live
+
+      - name: Verify live trip HTML binders exist
+        run: |
+          test -s output/live/trips/ci-live-trip/output/current-binder.html
+          test -s output/live/trips/ci-live-trip/output/final-binder.html

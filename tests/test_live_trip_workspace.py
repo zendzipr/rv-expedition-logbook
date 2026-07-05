@@ -812,6 +812,85 @@ class LiveTripWorkspaceTest(unittest.TestCase):
             conn.close()
         self.assertEqual(rows[-1][0], "Loved the Blue Ridge stretch and would stay longer next time.")
 
+    def test_render_current_binder_html_writes_workspace_output(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        meal = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "add-meal", "blue-ridge-test", "12 Bones Smokehouse", "Asheville, NC", "Best ribs of the trip.", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(meal.returncode, 0, meal.stdout + meal.stderr)
+
+        result = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder-html", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        binder_path = trip_dir / "output" / "current-binder.html"
+        self.assertTrue(binder_path.exists())
+        binder = binder_path.read_text(encoding="utf-8")
+        self.assertIn("<!DOCTYPE html>", binder)
+        self.assertIn("Blue Ridge Test Trip", binder)
+        self.assertIn("12 Bones Smokehouse", binder)
+
+    def test_render_final_binder_html_writes_workspace_output(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        reflection = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "add-final-reflection", "blue-ridge-test", "Loved the Blue Ridge stretch and would stay longer next time.", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(reflection.returncode, 0, reflection.stdout + reflection.stderr)
+
+        finalize = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-final-binder-html", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(finalize.returncode, 0, finalize.stdout + finalize.stderr)
+        binder_path = trip_dir / "output" / "final-binder.html"
+        self.assertTrue(binder_path.exists())
+        binder = binder_path.read_text(encoding="utf-8")
+        self.assertIn("<!DOCTYPE html>", binder)
+        self.assertIn("Blue Ridge Test Trip", binder)
+        self.assertIn("Loved the Blue Ridge stretch", binder)
+
     def test_render_current_binder_writes_workspace_output(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

@@ -117,10 +117,22 @@ Finalize the trip and generate the final binder:
 python3 -m rv_logbook finalize-trip blue-ridge-test --base-dir data
 ```
 
-Render the current binder snapshot:
+Render the current binder snapshot as Markdown:
 
 ```bash
 python3 -m rv_logbook render-current-binder blue-ridge-test --base-dir data
+```
+
+Render the current binder snapshot as HTML:
+
+```bash
+python3 -m rv_logbook render-current-binder-html blue-ridge-test --base-dir data
+```
+
+Render the final binder as HTML:
+
+```bash
+python3 -m rv_logbook render-final-binder-html blue-ridge-test --base-dir data
 ```
 
 ## Database

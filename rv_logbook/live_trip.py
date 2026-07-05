@@ -4,10 +4,12 @@ from __future__ import annotations
 import json
 import sqlite3
 from datetime import datetime, timezone
+from html import escape
 from pathlib import Path
 from typing import Any
 
 from .render import load_json, render_binder
+from .render_html import render_html
 from .rv_trip_wizard import RvTripWizardImportError, import_rtw_file
 
 
@@ -525,6 +527,54 @@ def render_final_reflections(db_path: Path) -> str:
     return "\n".join(lines)
 
 
+def render_live_sections_html(db_path: Path) -> str:
+    entries = load_trip_entries(db_path)
+    if not entries:
+        return ""
+
+    grouped: dict[str, list[dict[str, str | None]]] = {}
+    for entry in entries:
+        section = SECTION_TITLES.get(entry["entry_type"] or "general", "General Notes")
+        grouped.setdefault(section, []).append(entry)
+
+    bits = ["<section class=\"card\"><h2>Live Binder Updates</h2>"]
+    for section in ["Meals", "Stops", "Campgrounds", "Travel Notes", "Fuel & Mileage", "General Notes"]:
+        section_entries = grouped.get(section, [])
+        if not section_entries:
+            continue
+        bits.append(f"<h3>{escape(section)}</h3>")
+        for entry in section_entries:
+            bits.append("<article class=\"live-entry\">")
+            bits.append(f"<h4>{escape(entry.get('title') or '')}</h4>")
+            if entry.get("occurred_on"):
+                bits.append(f"<p><strong>Date:</strong> {escape(entry['occurred_on'] or '')}</p>")
+            if entry.get("travel_day_id"):
+                bits.append(f"<p><strong>Travel day:</strong> {escape(entry['travel_day_id'] or '')}</p>")
+            content = escape(entry.get("content") or "").replace("\n", "<br>")
+            bits.append(f"<p>{content}</p>")
+            bits.append("</article>")
+    bits.append("</section>")
+    return "".join(bits)
+
+
+def render_final_reflections_html(db_path: Path) -> str:
+    reflections = load_final_reflections(db_path)
+    if not reflections:
+        return ""
+    items = "".join(f"<li>{escape(reflection)}</li>" for reflection in reflections)
+    return f"<section class=\"card\"><h2>Final Reflections</h2><ul>{items}</ul></section>"
+
+
+def append_html_sections(base_html: str, *sections: str) -> str:
+    extra = "".join(section for section in sections if section)
+    if not extra:
+        return base_html
+    marker = "</body>"
+    if marker in base_html:
+        return base_html.replace(marker, extra + marker)
+    return base_html + extra
+
+
 def render_current_binder(base_dir: Path, trip_slug: str) -> Path:
     paths = require_workspace(base_dir, trip_slug)
     trip_data: dict[str, Any] = load_json(paths["trip_json"])
@@ -533,6 +583,17 @@ def render_current_binder(base_dir: Path, trip_slug: str) -> Path:
     output_path = paths["output"] / "current-binder.md"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(binder, encoding="utf-8")
+    return output_path
+
+
+def render_current_binder_html(base_dir: Path, trip_slug: str) -> Path:
+    paths = require_workspace(base_dir, trip_slug)
+    trip_data: dict[str, Any] = load_json(paths["trip_json"])
+    html = render_html(trip_data)
+    html = append_html_sections(html, render_live_sections_html(paths["db"]))
+    output_path = paths["output"] / "current-binder.html"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html, encoding="utf-8")
     return output_path
 
 
@@ -548,4 +609,19 @@ def finalize_trip(base_dir: Path, trip_slug: str) -> Path:
     output_path = paths["output"] / "final-binder.md"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(binder, encoding="utf-8")
+    return output_path
+
+
+def render_final_binder_html(base_dir: Path, trip_slug: str) -> Path:
+    paths = require_workspace(base_dir, trip_slug)
+    trip_data: dict[str, Any] = load_json(paths["trip_json"])
+    html = render_html(trip_data)
+    html = append_html_sections(
+        html,
+        render_live_sections_html(paths["db"]),
+        render_final_reflections_html(paths["db"]),
+    )
+    output_path = paths["output"] / "final-binder.html"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html, encoding="utf-8")
     return output_path
