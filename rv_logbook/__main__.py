@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from .importers import CsvImportError, import_csv, write_json
+from .live_trip import LiveTripError, add_trip_note, create_live_trip, render_current_binder
 from .merge import MergeError, merge_record_files
 from .render import BinderRenderError, fail, load_json, render_binder
 from .render_html import render_html
@@ -20,6 +21,21 @@ def build_parser() -> argparse.ArgumentParser:
     render_parser = subparsers.add_parser("render", help="render a Markdown binder from trip JSON")
     render_parser.add_argument("input", help="input trip JSON file")
     render_parser.add_argument("output", help="output Markdown file")
+
+    create_live_parser = subparsers.add_parser("create-live-trip", help="create a live trip workspace from an RV Trip Wizard export")
+    create_live_parser.add_argument("trip_slug", help="folder slug for the trip workspace")
+    create_live_parser.add_argument("rtw_input", help="input RV Trip Wizard export JSON file")
+    create_live_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_note_parser = subparsers.add_parser("add-trip-note", help="append a typed note to a live trip workspace")
+    add_note_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_note_parser.add_argument("note_type", choices=["daily", "campground", "meal", "travel", "stop", "general"], help="note category")
+    add_note_parser.add_argument("content", help="note text to append")
+    add_note_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    render_current_parser = subparsers.add_parser("render-current-binder", help="render the current binder snapshot for a live trip workspace")
+    render_current_parser.add_argument("trip_slug", help="trip workspace slug")
+    render_current_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     render_html_parser = subparsers.add_parser("render-html", help="render an HTML trip report from trip JSON")
     render_html_parser.add_argument("input", help="input trip JSON file")
@@ -66,6 +82,36 @@ def render_command(input_path: str, output_path: str) -> int:
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(rendered, encoding="utf-8")
     print(f"Rendered binder: {destination}")
+    return 0
+
+
+def create_live_trip_command(trip_slug: str, rtw_input: str, base_dir: str = "data") -> int:
+    try:
+        root = create_live_trip(Path(base_dir), trip_slug, Path(rtw_input))
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Created live trip workspace: {root}")
+    return 0
+
+
+def add_trip_note_command(trip_slug: str, note_type: str, content: str, base_dir: str = "data") -> int:
+    try:
+        note_path = add_trip_note(Path(base_dir), trip_slug, note_type, content)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added {note_type} note to {note_path}")
+    return 0
+
+
+def render_current_binder_command(trip_slug: str, base_dir: str = "data") -> int:
+    try:
+        output_path = render_current_binder(Path(base_dir), trip_slug)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Rendered current binder: {output_path}")
     return 0
 
 
@@ -152,6 +198,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "render":
         return render_command(args.input, args.output)
+    if args.command == "create-live-trip":
+        return create_live_trip_command(args.trip_slug, args.rtw_input, args.base_dir)
+    if args.command == "add-trip-note":
+        return add_trip_note_command(args.trip_slug, args.note_type, args.content, args.base_dir)
+    if args.command == "render-current-binder":
+        return render_current_binder_command(args.trip_slug, args.base_dir)
     if args.command == "render-html":
         return render_html_command(args.input, args.output)
     if args.command == "validate":

@@ -91,6 +91,16 @@ make ingest-sample
 make rtw-sample
 ```
 
+## Live trip workspaces
+
+The binder-first workflow now supports per-trip live workspaces under:
+
+```text
+data/trips/<trip-slug>/
+```
+
+See `docs/LIVE_TRIP_WORKFLOW.md` for the live-trip commands and workspace layout.
+
 ## Release notes
 
 See `CHANGELOG.md` for milestone summaries.
