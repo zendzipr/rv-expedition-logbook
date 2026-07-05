@@ -303,6 +303,115 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         self.assertIn("$165.75", binder)
         self.assertIn("Odometer: 12345", binder)
 
+    def test_add_stop_command_creates_binder_friendly_stop_entry(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        stop = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-stop",
+                "blue-ridge-test",
+                "Biltmore Estate",
+                "Asheville, NC",
+                "Great detour and worth the ticket price.",
+                "--date",
+                "2026-05-01",
+                "--travel-day-id",
+                "stop-001",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(stop.returncode, 0, stop.stdout + stop.stderr)
+
+        render = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
+        binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
+        self.assertIn("# Stops", binder)
+        self.assertIn("Biltmore Estate", binder)
+        self.assertIn("Asheville, NC", binder)
+        self.assertIn("worth the ticket price", binder)
+
+    def test_add_campground_review_command_creates_binder_friendly_review(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        campground = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-campground-review",
+                "blue-ridge-test",
+                "Sample Campground",
+                "Site 12",
+                "4.5",
+                "yes",
+                "Quiet site, strong hookups, would gladly return.",
+                "--date",
+                "2026-05-01",
+                "--travel-day-id",
+                "stop-001",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(campground.returncode, 0, campground.stdout + campground.stderr)
+
+        render = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
+        binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
+        self.assertIn("# Campgrounds", binder)
+        self.assertIn("Sample Campground", binder)
+        self.assertIn("Site 12", binder)
+        self.assertIn("Rating: 4.5/5", binder)
+        self.assertIn("Would return: yes", binder)
+
     def test_current_binder_groups_entries_into_binder_sections(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

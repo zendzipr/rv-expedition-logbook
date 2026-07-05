@@ -236,6 +236,55 @@ def add_fuel_stop(
     )
 
 
+def add_stop(
+    base_dir: Path,
+    trip_slug: str,
+    name: str,
+    location: str,
+    notes: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
+    content = f"Location: {location}\n\n{notes}"
+    add_trip_entry(
+        base_dir,
+        trip_slug,
+        "stop",
+        name,
+        content,
+        occurred_on=occurred_on,
+        travel_day_id=travel_day_id,
+    )
+
+
+def add_campground_review(
+    base_dir: Path,
+    trip_slug: str,
+    campground_name: str,
+    site: str,
+    rating: str,
+    would_return: str,
+    notes: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
+    content = (
+        f"Site: {site}\n"
+        f"Rating: {rating}/5\n"
+        f"Would return: {would_return}\n\n"
+        f"{notes}"
+    )
+    add_trip_entry(
+        base_dir,
+        trip_slug,
+        "campground",
+        campground_name,
+        content,
+        occurred_on=occurred_on,
+        travel_day_id=travel_day_id,
+    )
+
+
 def add_final_reflection(base_dir: Path, trip_slug: str, content: str) -> None:
     paths = require_workspace(base_dir, trip_slug)
     conn = sqlite3.connect(paths["db"])

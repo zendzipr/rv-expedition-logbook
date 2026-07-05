@@ -7,9 +7,11 @@ from pathlib import Path
 from .importers import CsvImportError, import_csv, write_json
 from .live_trip import (
     LiveTripError,
+    add_campground_review,
     add_final_reflection,
     add_fuel_stop,
     add_meal,
+    add_stop,
     add_trip_entry,
     add_trip_note,
     create_live_trip,
@@ -72,6 +74,26 @@ def build_parser() -> argparse.ArgumentParser:
     add_fuel_parser.add_argument("--date", dest="occurred_on", help="optional fuel stop date in YYYY-MM-DD form")
     add_fuel_parser.add_argument("--travel-day-id", help="optional related travel day id")
     add_fuel_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_stop_parser = subparsers.add_parser("add-stop", help="capture a memorable stop in binder-friendly form")
+    add_stop_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_stop_parser.add_argument("name", help="stop name")
+    add_stop_parser.add_argument("location", help="stop location")
+    add_stop_parser.add_argument("notes", help="stop notes")
+    add_stop_parser.add_argument("--date", dest="occurred_on", help="optional stop date in YYYY-MM-DD form")
+    add_stop_parser.add_argument("--travel-day-id", help="optional related travel day id")
+    add_stop_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_campground_parser = subparsers.add_parser("add-campground-review", help="capture a campground review in binder-friendly form")
+    add_campground_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_campground_parser.add_argument("campground_name", help="campground name")
+    add_campground_parser.add_argument("site", help="site identifier or description")
+    add_campground_parser.add_argument("rating", help="rating out of 5")
+    add_campground_parser.add_argument("would_return", help="yes/no or short return judgment")
+    add_campground_parser.add_argument("notes", help="campground review notes")
+    add_campground_parser.add_argument("--date", dest="occurred_on", help="optional review date in YYYY-MM-DD form")
+    add_campground_parser.add_argument("--travel-day-id", help="optional related travel day id")
+    add_campground_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
     questions_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -240,6 +262,62 @@ def add_fuel_stop_command(
     return 0
 
 
+def add_stop_command(
+    trip_slug: str,
+    name: str,
+    location: str,
+    notes: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
+    try:
+        add_stop(
+            Path(base_dir),
+            trip_slug,
+            name,
+            location,
+            notes,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added stop: {name}")
+    return 0
+
+
+def add_campground_review_command(
+    trip_slug: str,
+    campground_name: str,
+    site: str,
+    rating: str,
+    would_return: str,
+    notes: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
+    try:
+        add_campground_review(
+            Path(base_dir),
+            trip_slug,
+            campground_name,
+            site,
+            rating,
+            would_return,
+            notes,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added campground review: {campground_name}")
+    return 0
+
+
 def trip_questions_command(trip_slug: str, base_dir: str = "data") -> int:
     try:
         questions = follow_up_questions(Path(base_dir), trip_slug)
@@ -399,6 +477,28 @@ def main(argv: list[str] | None = None) -> int:
             args.gallons,
             args.total_cost,
             args.odometer,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
+    if args.command == "add-stop":
+        return add_stop_command(
+            args.trip_slug,
+            args.name,
+            args.location,
+            args.notes,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
+    if args.command == "add-campground-review":
+        return add_campground_review_command(
+            args.trip_slug,
+            args.campground_name,
+            args.site,
+            args.rating,
+            args.would_return,
+            args.notes,
             args.base_dir,
             args.occurred_on,
             args.travel_day_id,
