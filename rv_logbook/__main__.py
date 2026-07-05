@@ -21,6 +21,7 @@ from .live_trip import (
     finalize_trip,
     follow_up_questions,
     render_current_binder,
+    trip_capture_prompts,
     trip_checklist,
     trip_daily_summary,
 )
@@ -133,6 +134,11 @@ def build_parser() -> argparse.ArgumentParser:
     daily_summary_parser.add_argument("trip_slug", help="trip workspace slug")
     daily_summary_parser.add_argument("date", help="date to summarize in YYYY-MM-DD form")
     daily_summary_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    capture_prompts_parser = subparsers.add_parser("trip-capture-prompts", help="print grouped conversational prompts for missing binder areas")
+    capture_prompts_parser.add_argument("trip_slug", help="trip workspace slug")
+    capture_prompts_parser.add_argument("--date", dest="occurred_on", help="optional date to focus prompts on one trip day")
+    capture_prompts_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
     questions_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -455,6 +461,16 @@ def trip_daily_summary_command(trip_slug: str, date: str, base_dir: str = "data"
     return 0
 
 
+def trip_capture_prompts_command(trip_slug: str, base_dir: str = "data", occurred_on: str | None = None) -> int:
+    try:
+        prompts = trip_capture_prompts(Path(base_dir), trip_slug, occurred_on)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(prompts, end="")
+    return 0
+
+
 def trip_questions_command(trip_slug: str, base_dir: str = "data") -> int:
     try:
         questions = follow_up_questions(Path(base_dir), trip_slug)
@@ -672,6 +688,8 @@ def main(argv: list[str] | None = None) -> int:
         return trip_checklist_command(args.trip_slug, args.base_dir)
     if args.command == "trip-daily-summary":
         return trip_daily_summary_command(args.trip_slug, args.date, args.base_dir)
+    if args.command == "trip-capture-prompts":
+        return trip_capture_prompts_command(args.trip_slug, args.base_dir, args.occurred_on)
     if args.command == "trip-questions":
         return trip_questions_command(args.trip_slug, args.base_dir)
     if args.command == "add-final-reflection":

@@ -116,6 +116,7 @@ python3 -m rv_logbook add-daily-review <trip-slug> "Day 1 wrap-up" "Beautiful dr
 python3 -m rv_logbook trip-questions <trip-slug> --base-dir data
 python3 -m rv_logbook trip-checklist <trip-slug> --base-dir data
 python3 -m rv_logbook trip-daily-summary <trip-slug> 2026-05-01 --base-dir data
+python3 -m rv_logbook trip-capture-prompts <trip-slug> --date 2026-05-01 --base-dir data
 python3 -m rv_logbook add-final-reflection <trip-slug> "Loved the Blue Ridge stretch and would stay longer next time." --base-dir data
 python3 -m rv_logbook finalize-trip <trip-slug> --base-dir data
 python3 -m rv_logbook render-current-binder <trip-slug> --base-dir data

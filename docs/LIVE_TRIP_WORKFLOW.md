@@ -99,6 +99,12 @@ Generate a short summary of what was captured for a specific day:
 python3 -m rv_logbook trip-daily-summary blue-ridge-test 2026-05-01 --base-dir data
 ```
 
+Generate grouped conversational prompts for what is still missing:
+
+```bash
+python3 -m rv_logbook trip-capture-prompts blue-ridge-test --date 2026-05-01 --base-dir data
+```
+
 Add a final reflection after the trip:
 
 ```bash

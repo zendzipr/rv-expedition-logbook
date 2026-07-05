@@ -667,6 +667,34 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         self.assertIn("fuel stop or mileage note", summary.stdout)
         self.assertIn("stop or attraction", summary.stdout)
 
+    def test_trip_capture_prompts_groups_missing_areas_for_a_day(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        prompts = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "trip-capture-prompts", "blue-ridge-test", "--date", "2026-05-01", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(prompts.returncode, 0, prompts.stdout + prompts.stderr)
+        self.assertIn("Meals", prompts.stdout)
+        self.assertIn("Fuel & Mileage", prompts.stdout)
+        self.assertIn("Stops", prompts.stdout)
+        self.assertIn("Campgrounds", prompts.stdout)
+        self.assertIn("Travel Day", prompts.stdout)
+
     def test_current_binder_groups_entries_into_binder_sections(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

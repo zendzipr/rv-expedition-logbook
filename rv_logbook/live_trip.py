@@ -451,6 +451,38 @@ def trip_daily_summary(base_dir: Path, trip_slug: str, occurred_on: str) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def trip_capture_prompts(base_dir: Path, trip_slug: str, occurred_on: str | None = None) -> str:
+    paths = require_workspace(base_dir, trip_slug)
+    entries = load_trip_entries(paths["db"])
+    if occurred_on:
+        entries = [entry for entry in entries if entry.get("occurred_on") == occurred_on]
+    have_types = {entry["entry_type"] for entry in entries}
+
+    sections: list[tuple[str, str]] = []
+    if "meal" not in have_types:
+        sections.append(("Meals", "What did you eat today, and was any meal worth remembering in the binder?"))
+    if "fuel" not in have_types and "mileage" not in have_types:
+        sections.append(("Fuel & Mileage", "Did you buy fuel or notice anything important about mileage, grades, or fuel economy today?"))
+    if "stop" not in have_types:
+        sections.append(("Stops", "Were there any stops, attractions, viewpoints, or quick detours worth recording?"))
+    if "campground" not in have_types:
+        sections.append(("Campgrounds", "How was the campground in practice — site, hookups, noise, and would you return?"))
+    if "travel" not in have_types:
+        sections.append(("Travel Day", "What stood out about the drive today — weather, road conditions, delays, or lessons learned?"))
+
+    lines = ["Capture prompts", ""]
+    if occurred_on:
+        lines[0] = f"Capture prompts for {occurred_on}"
+    if not sections:
+        lines.append("Nothing obvious is missing right now.")
+        return "\n".join(lines) + "\n"
+    for heading, prompt in sections:
+        lines.append(f"## {heading}")
+        lines.append(prompt)
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def render_live_sections(db_path: Path) -> str:
     entries = load_trip_entries(db_path)
     if not entries:
