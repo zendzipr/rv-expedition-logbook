@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sample Blue Ridge Weekend - RV Expedition Logbook</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem auto; max-width: 1100px; padding: 0 1rem; color: #1f2937; background: #f8fafc; }
+    h1, h2, h3, h4, h5 { color: #0f172a; }
+    .card, .travel-day { background: white; border: 1px solid #dbeafe; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    table { width: 100%; border-collapse: collapse; background: white; margin: 0.75rem 0 1.5rem; }
+    th, td { border: 1px solid #cbd5e1; padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+    th { background: #e2e8f0; }
+    .kv th { width: 18rem; }
+    .muted { color: #64748b; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
+    .stat { background: white; border: 1px solid #dbeafe; border-radius: 10px; padding: 0.75rem; }
+    code { background: #e2e8f0; padding: 0.1rem 0.3rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header class="card">
+    <h1>Sample Blue Ridge Weekend</h1>
+    <p><strong>Dates:</strong> 2026-05-01 – 2026-05-03</p>
+    <p><strong>Travelers:</strong> Example Traveler</p>
+    <p>A sanitized sample trip used for schema and template development.</p>
+  </header>
+
+  <section class="card">
+    <h2>Trip Summary</h2>
+    <div class="stats">
+      <div class="stat"><strong>Total Miles</strong><br>210</div>
+      <div class="stat"><strong>Campgrounds</strong><br>1</div>
+      <div class="stat"><strong>Fuel Cost</strong><br>$165.75</div>
+      <div class="stat"><strong>Total Cost</strong><br>$194.25</div>
+    </div>
+    <h3>Highlights</h3>
+    <ul><li>Good weather</li><li>Easy check-in</li></ul>
+    <h3>Lessons Learned</h3>
+    <ul><li>Start earlier on Friday travel days.</li></ul>
+  </section>
+
+  <section>
+    <h2>Travel Day Details</h2>
+    <section class="travel-day"><h3>Travel Day: 2026-05-01</h3><table class="kv"><tr><th>Origin</th><td>Sample City, VA</td></tr><tr><th>Destination</th><td>Sample Campground, NC</td></tr><tr><th>Miles</th><td>210</td></tr><tr><th>Drive Time</th><td>4h 30m</td></tr><tr><th>Weather</th><td>Clear, mild, light mountain wind</td></tr></table><h4>Route Notes</h4><p>Mountain grades required slower driving. This is not real private travel data.</p><h4>Arrival / Setup Notes</h4><p>Arrived before dusk and had an easy setup.</p><h4>Highlights</h4><ul><li>Good weather</li><li>Easy check-in</li></ul><h4>Lessons Learned</h4><ul><li>Start earlier on Friday travel days.</li></ul><section><h4>Campground</h4><table class="kv"><tr><th>Name</th><td>Sample Campground</td></tr><tr><th>Location</th><td>Western North Carolina</td></tr><tr><th>Site</th><td>Example Site 12</td></tr><tr><th>Hookups</th><td>50A, water, sewer</td></tr><tr><th>Connectivity</th><td>Verizon: usable, Starlink: clear northern sky</td></tr><tr><th>Rating</th><td>4/5</td></tr><tr><th>Would Return</th><td>yes</td></tr></table><p>Sanitized example campground with good access roads and quiet evenings.</p></section><section><h4>Captain's Log</h4><article class="journal-entry"><h4>2026-05-01</h4><p>A smooth first travel day with good weather and an easy arrival.</p><h5>Lessons</h5><ul><li>Leave early enough to arrive before dusk.</li></ul></article></section></section>
+  </section>
+
+  <section class="card">
+    <h2>Fuel Stops</h2>
+    <table><thead><tr><th>Date</th><th>Vendor</th><th>Location</th><th>Odometer</th><th>Gallons</th><th>Total</th><th>Price/Gal</th></tr></thead><tbody><tr><td>2026-05-01</td><td>Example Fuel</td><td>Sample Town, VA</td><td>12345</td><td>42.50</td><td>$165.75</td><td>$3.90</td></tr></tbody></table>
+  </section>
+
+  <section class="card">
+    <h2>Expenses</h2>
+    <table><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th><th>Notes</th></tr></thead><tbody><tr><td>2026-05-01</td><td>food</td><td>Example BBQ</td><td>$28.50</td><td>Sanitized restaurant expense.</td></tr></tbody></table>
+  </section>
+
+  <section class="card">
+    <h2>Maintenance</h2>
+    <table><thead><tr><th>Date</th><th>System</th><th>Title</th><th>Status</th><th>Cost</th><th>Follow-up</th></tr></thead><tbody><tr><td>2026-05-01</td><td>tires</td><td>Checked tire pressures</td><td>completed</td><td>$0.00</td><td>Check again before return leg.</td></tr></tbody></table>
+  </section>
+</body>
+</html>

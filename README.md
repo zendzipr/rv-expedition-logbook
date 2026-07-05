@@ -75,6 +75,24 @@ python3 -m rv_logbook render-html examples/sample-trip.json examples/sample-repo
 
 This renders the same structured trip data as a standalone HTML report.
 
+## Useful shortcuts
+
+Common development tasks are available through `make`:
+
+```bash
+make validate
+make test
+make render-sample
+make render-html-sample
+make import-sample
+make ingest-sample
+make rtw-sample
+```
+
+## Release notes
+
+See `CHANGELOG.md` for milestone summaries.
+
 ## Continuous integration
 
 GitHub Actions installs the package, runs JSON Schema validation, runs unit tests, renders the sample binder, renders the sample HTML report, exercises the sample CSV import path, exercises the RV Trip Wizard scaffold, verifies trip-record merging, and exercises the higher-level CSV ingest workflow on pushes and pull requests to `main`.

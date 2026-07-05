@@ -1,0 +1,51 @@
+{
+  "id": "blue-ridge-test-trip",
+  "name": "Blue Ridge Test Trip",
+  "start_date": "2026-05-01",
+  "end_date": "2026-05-03",
+  "summary": "Imported from RV Trip Wizard export.",
+  "travel_days": [
+    {
+      "id": "stop-001",
+      "trip_id": "blue-ridge-test-trip",
+      "date": "2026-05-01",
+      "destination": "Sample Campground",
+      "miles": 210,
+      "route_notes": "Mountain grades required slower driving.",
+      "campground": {
+        "id": "stop-001",
+        "name": "Sample Campground",
+        "location": "Western North Carolina",
+        "site": "12",
+        "notes": "",
+        "provenance": {
+          "source": "rv-trip-wizard",
+          "source_ref": "stop-001"
+        }
+      },
+      "expenses": [
+        {
+          "id": "stop-001-campground-expense",
+          "travel_day_id": "stop-001",
+          "date": "2026-05-01",
+          "category": "campground",
+          "amount": 45.0,
+          "vendor": "Sample Campground",
+          "notes": "Imported from RV Trip Wizard nightly cost.",
+          "provenance": {
+            "source": "rv-trip-wizard",
+            "source_ref": "stop-001"
+          }
+        }
+      ],
+      "provenance": {
+        "source": "rv-trip-wizard",
+        "source_ref": "stop-001"
+      }
+    }
+  ],
+  "provenance": {
+    "source": "rv-trip-wizard",
+    "source_ref": "rv-trip-wizard-export"
+  }
+}
