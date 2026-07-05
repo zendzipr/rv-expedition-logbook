@@ -76,6 +76,7 @@ python3 -m rv_logbook add-stop blue-ridge-test "Biltmore Estate" "Asheville, NC"
 python3 -m rv_logbook add-campground-review blue-ridge-test "Sample Campground" "Site 12" 4.5 yes "Quiet site, strong hookups, would gladly return." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 python3 -m rv_logbook add-travel-day-note blue-ridge-test "Rainy mountain driving" "Heavy fog and steep grades made the day slower than expected." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 python3 -m rv_logbook add-mileage-note blue-ridge-test "Mountain segment" 210 "Slow climbing miles with lower fuel economy than normal." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+python3 -m rv_logbook add-daily-review blue-ridge-test "Day 1 wrap-up" "Beautiful drive, good campground, and slower mountain miles than planned." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 ```
 
 These binder-native commands are meant to let you capture the trip the way you actually experience it, instead of forcing everything through generic entry terminology.
@@ -84,6 +85,12 @@ List follow-up questions the system still wants answered:
 
 ```bash
 python3 -m rv_logbook trip-questions blue-ridge-test --base-dir data
+```
+
+Show a quick checklist of what is still missing for the binder:
+
+```bash
+python3 -m rv_logbook trip-checklist blue-ridge-test --base-dir data
 ```
 
 Add a final reflection after the trip:

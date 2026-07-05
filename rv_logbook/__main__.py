@@ -8,6 +8,7 @@ from .importers import CsvImportError, import_csv, write_json
 from .live_trip import (
     LiveTripError,
     add_campground_review,
+    add_daily_review,
     add_final_reflection,
     add_fuel_stop,
     add_meal,
@@ -20,6 +21,7 @@ from .live_trip import (
     finalize_trip,
     follow_up_questions,
     render_current_binder,
+    trip_checklist,
 )
 from .merge import MergeError, merge_record_files
 from .render import BinderRenderError, fail, load_json, render_binder
@@ -113,6 +115,18 @@ def build_parser() -> argparse.ArgumentParser:
     add_mileage_parser.add_argument("--date", dest="occurred_on", help="optional mileage date in YYYY-MM-DD form")
     add_mileage_parser.add_argument("--travel-day-id", help="optional related travel day id")
     add_mileage_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_daily_parser = subparsers.add_parser("add-daily-review", help="capture an end-of-day review in binder-friendly form")
+    add_daily_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_daily_parser.add_argument("title", help="daily review title")
+    add_daily_parser.add_argument("notes", help="daily review notes")
+    add_daily_parser.add_argument("--date", dest="occurred_on", help="optional review date in YYYY-MM-DD form")
+    add_daily_parser.add_argument("--travel-day-id", help="optional related travel day id")
+    add_daily_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    checklist_parser = subparsers.add_parser("trip-checklist", help="show what is still missing for the current trip binder")
+    checklist_parser.add_argument("trip_slug", help="trip workspace slug")
+    checklist_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
     questions_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -387,6 +401,44 @@ def add_mileage_note_command(
     return 0
 
 
+def add_daily_review_command(
+    trip_slug: str,
+    title: str,
+    notes: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
+    try:
+        add_daily_review(
+            Path(base_dir),
+            trip_slug,
+            title,
+            notes,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added daily review: {title}")
+    return 0
+
+
+def trip_checklist_command(trip_slug: str, base_dir: str = "data") -> int:
+    try:
+        items = trip_checklist(Path(base_dir), trip_slug)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    if not items:
+        print("Trip binder checklist is clear.")
+        return 0
+    for item in items:
+        print(item)
+    return 0
+
+
 def trip_questions_command(trip_slug: str, base_dir: str = "data") -> int:
     try:
         questions = follow_up_questions(Path(base_dir), trip_slug)
@@ -591,6 +643,17 @@ def main(argv: list[str] | None = None) -> int:
             args.occurred_on,
             args.travel_day_id,
         )
+    if args.command == "add-daily-review":
+        return add_daily_review_command(
+            args.trip_slug,
+            args.title,
+            args.notes,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
+    if args.command == "trip-checklist":
+        return trip_checklist_command(args.trip_slug, args.base_dir)
     if args.command == "trip-questions":
         return trip_questions_command(args.trip_slug, args.base_dir)
     if args.command == "add-final-reflection":

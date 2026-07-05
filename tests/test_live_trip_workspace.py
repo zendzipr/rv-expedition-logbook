@@ -516,6 +516,86 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         self.assertIn("Miles: 210", binder)
         self.assertIn("lower fuel economy", binder)
 
+    def test_trip_checklist_reports_missing_sections(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        checklist = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "trip-checklist", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(checklist.returncode, 0, checklist.stdout + checklist.stderr)
+        self.assertIn("Add at least one meal", checklist.stdout)
+        self.assertIn("Add at least one fuel stop or mileage note", checklist.stdout)
+        self.assertIn("Add a stop or attraction", checklist.stdout)
+
+    def test_add_daily_review_updates_notes_and_binder(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        review = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-daily-review",
+                "blue-ridge-test",
+                "Day 1 wrap-up",
+                "Beautiful drive, good campground, and slower mountain miles than planned.",
+                "--date",
+                "2026-05-01",
+                "--travel-day-id",
+                "stop-001",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(review.returncode, 0, review.stdout + review.stderr)
+
+        daily_notes = (trip_dir / "notes" / "daily-notes.md").read_text(encoding="utf-8")
+        self.assertIn("Beautiful drive, good campground", daily_notes)
+
+        render = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
+        binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
+        self.assertIn("# Travel Notes", binder)
+        self.assertIn("Day 1 wrap-up", binder)
+        self.assertIn("Beautiful drive, good campground", binder)
+
     def test_current_binder_groups_entries_into_binder_sections(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())

@@ -325,6 +325,25 @@ def add_mileage_note(
     )
 
 
+def add_daily_review(
+    base_dir: Path,
+    trip_slug: str,
+    title: str,
+    notes: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
+    add_trip_note(base_dir, trip_slug, "daily", notes)
+    add_travel_day_note(
+        base_dir,
+        trip_slug,
+        title,
+        notes,
+        occurred_on=occurred_on,
+        travel_day_id=travel_day_id,
+    )
+
+
 def add_final_reflection(base_dir: Path, trip_slug: str, content: str) -> None:
     paths = require_workspace(base_dir, trip_slug)
     conn = sqlite3.connect(paths["db"])
@@ -377,6 +396,27 @@ def follow_up_questions(base_dir: Path, trip_slug: str) -> list[str]:
         if entry_type not in have_types:
             questions.append(question)
     return questions
+
+
+def trip_checklist(base_dir: Path, trip_slug: str) -> list[str]:
+    paths = require_workspace(base_dir, trip_slug)
+    entries = load_trip_entries(paths["db"])
+    have_types = {entry["entry_type"] for entry in entries}
+    items: list[str] = []
+    if "meal" not in have_types:
+        items.append("Add at least one meal")
+    if "fuel" not in have_types and "mileage" not in have_types:
+        items.append("Add at least one fuel stop or mileage note")
+    if "stop" not in have_types:
+        items.append("Add a stop or attraction")
+    if "campground" not in have_types:
+        items.append("Add a campground review")
+    if "travel" not in have_types:
+        items.append("Add a travel-day note")
+    reflections = load_final_reflections(paths["db"])
+    if not reflections:
+        items.append("Add a final reflection before finalizing the trip")
+    return items
 
 
 def render_live_sections(db_path: Path) -> str:
