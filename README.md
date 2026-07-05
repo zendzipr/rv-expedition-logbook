@@ -106,6 +106,8 @@ python3 -m rv_logbook create-live-trip <trip-slug> <rtw-export.json> --base-dir 
 python3 -m rv_logbook add-trip-note <trip-slug> meal "Great BBQ in Asheville." --base-dir data
 python3 -m rv_logbook add-trip-entry <trip-slug> meal "12 Bones Smokehouse" "Best ribs of the trip." --base-dir data
 python3 -m rv_logbook add-trip-entry <trip-slug> fuel "Pilot fill-up" "Topped off before the climb." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+python3 -m rv_logbook add-meal <trip-slug> "12 Bones Smokehouse" "Asheville, NC" "Best ribs of the trip." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+python3 -m rv_logbook add-fuel-stop <trip-slug> Pilot "Asheville, NC" 42.5 165.75 12345 --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 python3 -m rv_logbook trip-questions <trip-slug> --base-dir data
 python3 -m rv_logbook add-final-reflection <trip-slug> "Loved the Blue Ridge stretch and would stay longer next time." --base-dir data
 python3 -m rv_logbook finalize-trip <trip-slug> --base-dir data

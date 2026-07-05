@@ -67,6 +67,13 @@ Structured entries can also be tied to a date and a travel day:
 python3 -m rv_logbook add-trip-entry blue-ridge-test fuel "Pilot fill-up" "Topped off before the climb." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 ```
 
+If you do not want to think in generic entry types, you can use binder-native helpers:
+
+```bash
+python3 -m rv_logbook add-meal blue-ridge-test "12 Bones Smokehouse" "Asheville, NC" "Best ribs of the trip." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+python3 -m rv_logbook add-fuel-stop blue-ridge-test Pilot "Asheville, NC" 42.5 165.75 12345 --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+```
+
 List follow-up questions the system still wants answered:
 
 ```bash

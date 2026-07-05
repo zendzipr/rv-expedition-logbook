@@ -187,6 +187,55 @@ def add_trip_entry(
         conn.close()
 
 
+def add_meal(
+    base_dir: Path,
+    trip_slug: str,
+    restaurant: str,
+    location: str,
+    notes: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
+    content = f"Location: {location}\n\n{notes}"
+    add_trip_entry(
+        base_dir,
+        trip_slug,
+        "meal",
+        restaurant,
+        content,
+        occurred_on=occurred_on,
+        travel_day_id=travel_day_id,
+    )
+
+
+def add_fuel_stop(
+    base_dir: Path,
+    trip_slug: str,
+    vendor: str,
+    location: str,
+    gallons: str,
+    total_cost: str,
+    odometer: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
+    content = (
+        f"Location: {location}\n\n"
+        f"{gallons} gallons\n"
+        f"Total: ${total_cost}\n"
+        f"Odometer: {odometer}"
+    )
+    add_trip_entry(
+        base_dir,
+        trip_slug,
+        "fuel",
+        vendor,
+        content,
+        occurred_on=occurred_on,
+        travel_day_id=travel_day_id,
+    )
+
+
 def add_final_reflection(base_dir: Path, trip_slug: str, content: str) -> None:
     paths = require_workspace(base_dir, trip_slug)
     conn = sqlite3.connect(paths["db"])

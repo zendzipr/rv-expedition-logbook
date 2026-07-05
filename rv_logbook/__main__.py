@@ -8,6 +8,8 @@ from .importers import CsvImportError, import_csv, write_json
 from .live_trip import (
     LiveTripError,
     add_final_reflection,
+    add_fuel_stop,
+    add_meal,
     add_trip_entry,
     add_trip_note,
     create_live_trip,
@@ -50,6 +52,26 @@ def build_parser() -> argparse.ArgumentParser:
     add_entry_parser.add_argument("--date", dest="occurred_on", help="optional entry date in YYYY-MM-DD form")
     add_entry_parser.add_argument("--travel-day-id", help="optional related travel day id")
     add_entry_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_meal_parser = subparsers.add_parser("add-meal", help="capture a meal in binder-friendly form")
+    add_meal_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_meal_parser.add_argument("restaurant", help="meal title or restaurant name")
+    add_meal_parser.add_argument("location", help="meal location")
+    add_meal_parser.add_argument("notes", help="meal notes")
+    add_meal_parser.add_argument("--date", dest="occurred_on", help="optional meal date in YYYY-MM-DD form")
+    add_meal_parser.add_argument("--travel-day-id", help="optional related travel day id")
+    add_meal_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_fuel_parser = subparsers.add_parser("add-fuel-stop", help="capture a fuel stop in binder-friendly form")
+    add_fuel_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_fuel_parser.add_argument("vendor", help="fuel vendor")
+    add_fuel_parser.add_argument("location", help="fuel stop location")
+    add_fuel_parser.add_argument("gallons", help="gallons pumped")
+    add_fuel_parser.add_argument("total_cost", help="total fuel cost")
+    add_fuel_parser.add_argument("odometer", help="odometer reading")
+    add_fuel_parser.add_argument("--date", dest="occurred_on", help="optional fuel stop date in YYYY-MM-DD form")
+    add_fuel_parser.add_argument("--travel-day-id", help="optional related travel day id")
+    add_fuel_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
     questions_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -159,6 +181,62 @@ def add_trip_entry_command(
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     print(f"Added {entry_type} entry: {title}")
+    return 0
+
+
+def add_meal_command(
+    trip_slug: str,
+    restaurant: str,
+    location: str,
+    notes: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
+    try:
+        add_meal(
+            Path(base_dir),
+            trip_slug,
+            restaurant,
+            location,
+            notes,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added meal: {restaurant}")
+    return 0
+
+
+def add_fuel_stop_command(
+    trip_slug: str,
+    vendor: str,
+    location: str,
+    gallons: str,
+    total_cost: str,
+    odometer: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
+    try:
+        add_fuel_stop(
+            Path(base_dir),
+            trip_slug,
+            vendor,
+            location,
+            gallons,
+            total_cost,
+            odometer,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added fuel stop: {vendor}")
     return 0
 
 
@@ -299,6 +377,28 @@ def main(argv: list[str] | None = None) -> int:
             args.entry_type,
             args.title,
             args.content,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
+    if args.command == "add-meal":
+        return add_meal_command(
+            args.trip_slug,
+            args.restaurant,
+            args.location,
+            args.notes,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
+    if args.command == "add-fuel-stop":
+        return add_fuel_stop_command(
+            args.trip_slug,
+            args.vendor,
+            args.location,
+            args.gallons,
+            args.total_cost,
+            args.odometer,
             args.base_dir,
             args.occurred_on,
             args.travel_day_id,
