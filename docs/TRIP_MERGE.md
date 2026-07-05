@@ -19,7 +19,9 @@ Supported record types:
 ## Behavior
 
 - Records are matched by `travel_day_id`.
-- Matching records are appended to the target travel day's array.
+- Matching records are appended to the target travel day's array by default.
+- `--mode replace` replaces the target travel day's existing record array instead of appending.
+- Append mode rejects duplicate record IDs already present on the target travel day.
 - Existing trip fields are preserved.
 - Unknown `travel_day_id` values fail fast.
 
@@ -35,6 +37,12 @@ python3 -m rv_logbook import-csv fuel-stop examples/sample-fuel-stops.csv output
 
 ```bash
 python3 -m rv_logbook merge-records fuel-stop trip.json output/fuel-stops.json output/merged-trip.json
+```
+
+Replace mode is also available:
+
+```bash
+python3 -m rv_logbook merge-records fuel-stop trip.json output/fuel-stops.json output/merged-trip.json --mode replace
 ```
 
 3. Validate and render:

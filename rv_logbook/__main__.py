@@ -37,6 +37,7 @@ def build_parser() -> argparse.ArgumentParser:
     merge_parser.add_argument("trip", help="trip JSON file")
     merge_parser.add_argument("records", help="records JSON array file")
     merge_parser.add_argument("output", help="output merged trip JSON file")
+    merge_parser.add_argument("--mode", choices=["append", "replace"], default="append", help="append new records or replace existing records for each matching travel day")
 
     subparsers.add_parser("validate-repo", help="validate repository schemas and examples")
     return parser
@@ -90,13 +91,13 @@ def import_csv_command(csv_type: str, input_path: str, output_path: str) -> int:
     return 0
 
 
-def merge_records_command(record_type: str, trip_path: str, records_path: str, output_path: str) -> int:
+def merge_records_command(record_type: str, trip_path: str, records_path: str, output_path: str, mode: str = "append") -> int:
     try:
-        merge_record_files(record_type, Path(trip_path), Path(records_path), Path(output_path))
+        merge_record_files(record_type, Path(trip_path), Path(records_path), Path(output_path), mode=mode)
     except MergeError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
-    print(f"Merged {record_type} records into {output_path}")
+    print(f"Merged {record_type} records into {output_path} using {mode} mode")
     return 0
 
 
@@ -124,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "import-csv":
         return import_csv_command(args.csv_type, args.input, args.output)
     if args.command == "merge-records":
-        return merge_records_command(args.record_type, args.trip, args.records, args.output)
+        return merge_records_command(args.record_type, args.trip, args.records, args.output, args.mode)
     if args.command == "validate-repo":
         return validate_repo_command()
     parser.error(f"unknown command: {args.command}")
