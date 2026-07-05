@@ -15,6 +15,7 @@ class CiWorkflowTest(unittest.TestCase):
         self.assertIn("python3 -m rv_logbook import-csv fuel-stop examples/sample-fuel-stops.csv", content)
         self.assertIn("python3 -m rv_logbook import-rtw examples/sample-rtw-export.json", content)
         self.assertIn("python3 -m rv_logbook merge-records fuel-stop examples/sample-trip.json examples/sample-fuel-stops-merge.json", content)
+        self.assertIn("python3 -m rv_logbook ingest-csv fuel-stop examples/sample-trip.json examples/sample-fuel-stops-single.csv", content)
 
 
 if __name__ == "__main__":

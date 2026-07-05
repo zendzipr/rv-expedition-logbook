@@ -1,0 +1,2 @@
+id,travel_day_id,date,vendor,location,odometer,gallons,total_cost,price_per_gallon,notes
+fuel-stop-001,sample-day-001,2026-05-01,Example Fuel,Sample Town VA,12345,42.5,165.75,3.9,Sample fuel stop only.

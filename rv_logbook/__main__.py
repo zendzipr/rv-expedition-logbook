@@ -10,6 +10,7 @@ from .render import BinderRenderError, fail, load_json, render_binder
 from .render_html import render_html
 from .rv_trip_wizard import RvTripWizardImportError, import_rtw_file
 from .schema import SchemaValidationError, validate_file, validate_repository
+from .workflows import WorkflowError, ingest_csv_to_trip
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -32,6 +33,13 @@ def build_parser() -> argparse.ArgumentParser:
     import_parser.add_argument("csv_type", choices=["fuel-stop", "expense"], help="CSV import type")
     import_parser.add_argument("input", help="input CSV file")
     import_parser.add_argument("output", help="output JSON file")
+
+    ingest_parser = subparsers.add_parser("ingest-csv", help="import a CSV, merge it into a trip, and validate the result")
+    ingest_parser.add_argument("csv_type", choices=["fuel-stop", "expense"], help="CSV import type")
+    ingest_parser.add_argument("trip", help="trip JSON file")
+    ingest_parser.add_argument("input", help="input CSV file")
+    ingest_parser.add_argument("output", help="output merged trip JSON file")
+    ingest_parser.add_argument("--merge-mode", choices=["append", "replace"], default="append", help="merge mode to use when applying imported records")
 
     import_rtw_parser = subparsers.add_parser("import-rtw", help="import an RV Trip Wizard JSON export into trip JSON")
     import_rtw_parser.add_argument("input", help="input RV Trip Wizard export JSON file")
@@ -96,6 +104,17 @@ def import_csv_command(csv_type: str, input_path: str, output_path: str) -> int:
     return 0
 
 
+def ingest_csv_command(csv_type: str, trip_path: str, input_path: str, output_path: str, merge_mode: str = "append") -> int:
+    try:
+        merged = ingest_csv_to_trip(csv_type, Path(trip_path), Path(input_path), Path(output_path), merge_mode=merge_mode)
+    except WorkflowError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    travel_days = len(merged.get("travel_days", [])) if isinstance(merged, dict) else 0
+    print(f"Ingested {csv_type} CSV into {output_path} with {travel_days} travel day(s) using {merge_mode} mode")
+    return 0
+
+
 def import_rtw_command(input_path: str, output_path: str) -> int:
     try:
         trip = import_rtw_file(Path(input_path), Path(output_path))
@@ -139,6 +158,8 @@ def main(argv: list[str] | None = None) -> int:
         return validate_command(args.input, args.schema)
     if args.command == "import-csv":
         return import_csv_command(args.csv_type, args.input, args.output)
+    if args.command == "ingest-csv":
+        return ingest_csv_command(args.csv_type, args.trip, args.input, args.output, args.merge_mode)
     if args.command == "import-rtw":
         return import_rtw_command(args.input, args.output)
     if args.command == "merge-records":

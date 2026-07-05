@@ -62,3 +62,12 @@ jobs:
 
       - name: Verify merged trip exists
         run: test -s output/merged-trip.json
+
+      - name: Ingest sample fuel-stop CSV directly into trip
+        run: python3 -m rv_logbook ingest-csv fuel-stop examples/sample-trip.json examples/sample-fuel-stops-single.csv output/ingested-trip.json
+
+      - name: Validate ingested trip
+        run: python3 -m rv_logbook validate output/ingested-trip.json --schema trip
+
+      - name: Verify ingested trip exists
+        run: test -s output/ingested-trip.json
