@@ -55,6 +55,18 @@ Add a note during the trip:
 python3 -m rv_logbook add-trip-note blue-ridge-test meal "Great BBQ in Asheville." --base-dir data
 ```
 
+Add a structured entry that should appear in the live binder snapshot:
+
+```bash
+python3 -m rv_logbook add-trip-entry blue-ridge-test meal "12 Bones Smokehouse" "Best ribs of the trip." --base-dir data
+```
+
+List follow-up questions the system still wants answered:
+
+```bash
+python3 -m rv_logbook trip-questions blue-ridge-test --base-dir data
+```
+
 Render the current binder snapshot:
 
 ```bash

@@ -5,7 +5,14 @@ import sys
 from pathlib import Path
 
 from .importers import CsvImportError, import_csv, write_json
-from .live_trip import LiveTripError, add_trip_note, create_live_trip, render_current_binder
+from .live_trip import (
+    LiveTripError,
+    add_trip_entry,
+    add_trip_note,
+    create_live_trip,
+    follow_up_questions,
+    render_current_binder,
+)
 from .merge import MergeError, merge_record_files
 from .render import BinderRenderError, fail, load_json, render_binder
 from .render_html import render_html
@@ -32,6 +39,17 @@ def build_parser() -> argparse.ArgumentParser:
     add_note_parser.add_argument("note_type", choices=["daily", "campground", "meal", "travel", "stop", "general"], help="note category")
     add_note_parser.add_argument("content", help="note text to append")
     add_note_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    add_entry_parser = subparsers.add_parser("add-trip-entry", help="store a structured live trip entry in the trip database")
+    add_entry_parser.add_argument("trip_slug", help="trip workspace slug")
+    add_entry_parser.add_argument("entry_type", choices=["meal", "stop", "campground", "travel", "fuel", "mileage", "general"], help="structured entry category")
+    add_entry_parser.add_argument("title", help="short entry title")
+    add_entry_parser.add_argument("content", help="entry details")
+    add_entry_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
+    questions_parser.add_argument("trip_slug", help="trip workspace slug")
+    questions_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     render_current_parser = subparsers.add_parser("render-current-binder", help="render the current binder snapshot for a live trip workspace")
     render_current_parser.add_argument("trip_slug", help="trip workspace slug")
@@ -102,6 +120,30 @@ def add_trip_note_command(trip_slug: str, note_type: str, content: str, base_dir
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     print(f"Added {note_type} note to {note_path}")
+    return 0
+
+
+def add_trip_entry_command(trip_slug: str, entry_type: str, title: str, content: str, base_dir: str = "data") -> int:
+    try:
+        add_trip_entry(Path(base_dir), trip_slug, entry_type, title, content)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Added {entry_type} entry: {title}")
+    return 0
+
+
+def trip_questions_command(trip_slug: str, base_dir: str = "data") -> int:
+    try:
+        questions = follow_up_questions(Path(base_dir), trip_slug)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    if not questions:
+        print("No follow-up questions right now.")
+        return 0
+    for question in questions:
+        print(question)
     return 0
 
 
@@ -202,6 +244,10 @@ def main(argv: list[str] | None = None) -> int:
         return create_live_trip_command(args.trip_slug, args.rtw_input, args.base_dir)
     if args.command == "add-trip-note":
         return add_trip_note_command(args.trip_slug, args.note_type, args.content, args.base_dir)
+    if args.command == "add-trip-entry":
+        return add_trip_entry_command(args.trip_slug, args.entry_type, args.title, args.content, args.base_dir)
+    if args.command == "trip-questions":
+        return trip_questions_command(args.trip_slug, args.base_dir)
     if args.command == "render-current-binder":
         return render_current_binder_command(args.trip_slug, args.base_dir)
     if args.command == "render-html":

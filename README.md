@@ -99,7 +99,17 @@ The binder-first workflow now supports per-trip live workspaces under:
 data/trips/<trip-slug>/
 ```
 
-See `docs/LIVE_TRIP_WORKFLOW.md` for the live-trip commands and workspace layout.
+Current live-trip commands include:
+
+```bash
+python3 -m rv_logbook create-live-trip <trip-slug> <rtw-export.json> --base-dir data
+python3 -m rv_logbook add-trip-note <trip-slug> meal "Great BBQ in Asheville." --base-dir data
+python3 -m rv_logbook add-trip-entry <trip-slug> meal "12 Bones Smokehouse" "Best ribs of the trip." --base-dir data
+python3 -m rv_logbook trip-questions <trip-slug> --base-dir data
+python3 -m rv_logbook render-current-binder <trip-slug> --base-dir data
+```
+
+See `docs/LIVE_TRIP_WORKFLOW.md` for the workspace layout and the live-trip workflow.
 
 ## Release notes
 

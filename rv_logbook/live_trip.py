@@ -23,6 +23,16 @@ NOTE_FILES = {
     "general": "general-notes.md",
 }
 
+ENTRY_TYPES = {"meal", "stop", "campground", "travel", "fuel", "mileage", "general"}
+
+
+QUESTION_RULES = [
+    ("meal", "What meals were memorable on this part of the trip?"),
+    ("stop", "Any memorable stops, attractions, or quick detours worth preserving in the binder?"),
+    ("campground", "How was the campground in practice — site quality, hookups, noise, and whether you would stay again?"),
+    ("travel", "What travel-day notes should be captured — weather, road conditions, or route lessons learned?"),
+]
+
 
 def trips_root(base_dir: Path) -> Path:
     return base_dir / "trips"
@@ -67,6 +77,17 @@ def init_trip_db(db_path: Path) -> None:
             )
             """
         )
+        conn.execute(
+            """
+            create table if not exists trip_entries (
+              id integer primary key autoincrement,
+              entry_type text not null,
+              title text not null,
+              content text not null,
+              created_at text not null
+            )
+            """
+        )
         conn.commit()
     finally:
         conn.close()
@@ -82,16 +103,25 @@ def create_live_trip(base_dir: Path, trip_slug: str, rtw_input: Path) -> Path:
     return paths["root"]
 
 
-def add_trip_note(base_dir: Path, trip_slug: str, note_type: str, content: str) -> Path:
-    if note_type not in NOTE_FILES:
-        valid = ", ".join(sorted(NOTE_FILES))
-        raise LiveTripError(f"unknown note type '{note_type}'. Valid types: {valid}")
+def require_workspace(base_dir: Path, trip_slug: str) -> dict[str, Path]:
     paths = trip_paths(base_dir, trip_slug)
     if not paths["trip_json"].exists():
         raise LiveTripError(f"trip workspace not found: {trip_slug}")
     init_trip_db(paths["db"])
+    return paths
 
-    timestamp = datetime.now(timezone.utc).isoformat()
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def add_trip_note(base_dir: Path, trip_slug: str, note_type: str, content: str) -> Path:
+    if note_type not in NOTE_FILES:
+        valid = ", ".join(sorted(NOTE_FILES))
+        raise LiveTripError(f"unknown note type '{note_type}'. Valid types: {valid}")
+    paths = require_workspace(base_dir, trip_slug)
+
+    timestamp = utc_now()
     note_path = paths["notes"] / NOTE_FILES[note_type]
     with note_path.open("a", encoding="utf-8") as handle:
         handle.write(f"\n## {timestamp}\n\n{content}\n")
@@ -108,12 +138,62 @@ def add_trip_note(base_dir: Path, trip_slug: str, note_type: str, content: str) 
     return note_path
 
 
+def add_trip_entry(base_dir: Path, trip_slug: str, entry_type: str, title: str, content: str) -> None:
+    if entry_type not in ENTRY_TYPES:
+        valid = ", ".join(sorted(ENTRY_TYPES))
+        raise LiveTripError(f"unknown entry type '{entry_type}'. Valid types: {valid}")
+    paths = require_workspace(base_dir, trip_slug)
+    conn = sqlite3.connect(paths["db"])
+    try:
+        conn.execute(
+            "insert into trip_entries(entry_type, title, content, created_at) values (?, ?, ?, ?)",
+            (entry_type, title, content, utc_now()),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_trip_entries(db_path: Path) -> list[tuple[str, str, str]]:
+    conn = sqlite3.connect(db_path)
+    try:
+        return conn.execute(
+            "select entry_type, title, content from trip_entries order by id"
+        ).fetchall()
+    finally:
+        conn.close()
+
+
+def follow_up_questions(base_dir: Path, trip_slug: str) -> list[str]:
+    paths = require_workspace(base_dir, trip_slug)
+    entries = load_trip_entries(paths["db"])
+    have_types = {entry_type for entry_type, _, _ in entries}
+
+    questions: list[str] = []
+    for entry_type, question in QUESTION_RULES:
+        if entry_type not in have_types:
+            questions.append(question)
+    return questions
+
+
+def render_live_sections(db_path: Path) -> str:
+    entries = load_trip_entries(db_path)
+    if not entries:
+        return ""
+    lines = ["", "# Live Trip Entries", ""]
+    for entry_type, title, content in entries:
+        lines.append(f"## {entry_type.title()}: {title}")
+        lines.append("")
+        lines.append(content)
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def render_current_binder(base_dir: Path, trip_slug: str) -> Path:
-    paths = trip_paths(base_dir, trip_slug)
-    if not paths["trip_json"].exists():
-        raise LiveTripError(f"trip workspace not found: {trip_slug}")
+    paths = require_workspace(base_dir, trip_slug)
     trip_data: dict[str, Any] = load_json(paths["trip_json"])
     binder = render_binder(trip_data)
+    binder += render_live_sections(paths["db"])
     output_path = paths["output"] / "current-binder.md"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(binder, encoding="utf-8")

@@ -93,6 +93,86 @@ class LiveTripWorkspaceTest(unittest.TestCase):
             conn.close()
         self.assertEqual(rows[-1], ("meal", "Great BBQ in Asheville."))
 
+    def test_add_trip_entry_updates_database_and_current_binder(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        entry = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-trip-entry",
+                "blue-ridge-test",
+                "meal",
+                "12 Bones Smokehouse",
+                "Best ribs of the trip.",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(entry.returncode, 0, entry.stdout + entry.stderr)
+
+        conn = sqlite3.connect(trip_dir / "trip.db")
+        try:
+            rows = conn.execute("select entry_type, title, content from trip_entries order by id").fetchall()
+        finally:
+            conn.close()
+        self.assertEqual(rows[-1], ("meal", "12 Bones Smokehouse", "Best ribs of the trip."))
+
+        render = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
+        binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
+        self.assertIn("Live Trip Entries", binder)
+        self.assertIn("12 Bones Smokehouse", binder)
+        self.assertIn("Best ribs of the trip.", binder)
+
+    def test_trip_questions_reports_missing_follow_up_areas(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        questions = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "trip-questions", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(questions.returncode, 0, questions.stdout + questions.stderr)
+        self.assertIn("What meals were memorable", questions.stdout)
+        self.assertIn("Any memorable stops", questions.stdout)
+
     def test_render_current_binder_writes_workspace_output(self):
         root = Path(__file__).resolve().parents[1]
         temp_dir = Path(tempfile.mkdtemp())
