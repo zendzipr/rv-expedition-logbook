@@ -1,0 +1,17 @@
+{
+  "trip_name": "Blue Ridge Test Trip",
+  "start_date": "2026-05-01",
+  "end_date": "2026-05-03",
+  "stops": [
+    {
+      "stop_id": "stop-001",
+      "date": "2026-05-01",
+      "name": "Sample Campground",
+      "location": "Western North Carolina",
+      "site": "12",
+      "nightly_cost": 45.0,
+      "distance_miles": 210,
+      "route_notes": "Mountain grades required slower driving."
+    }
+  ]
+}

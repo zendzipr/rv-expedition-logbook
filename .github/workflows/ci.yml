@@ -45,6 +45,15 @@ jobs:
       - name: Verify imported fuel-stop JSON exists
         run: test -s output/fuel-stops.json
 
+      - name: Import sample RV Trip Wizard export
+        run: python3 -m rv_logbook import-rtw examples/sample-rtw-export.json output/rtw-trip.json
+
+      - name: Validate imported RV Trip Wizard trip
+        run: python3 -m rv_logbook validate output/rtw-trip.json --schema trip
+
+      - name: Verify imported RV Trip Wizard trip exists
+        run: test -s output/rtw-trip.json
+
       - name: Merge sample fuel-stop records into trip
         run: python3 -m rv_logbook merge-records fuel-stop examples/sample-trip.json examples/sample-fuel-stops-merge.json output/merged-trip.json
 
