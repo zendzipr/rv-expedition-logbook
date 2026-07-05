@@ -39,4 +39,17 @@ A fuel stop, campground rating, travel-day note, or maintenance event should be 
 
 ```bash
 python3 scripts/validate.py
+python3 -m unittest discover -s tests
 ```
+
+## Generate the sample binder
+
+```bash
+python3 scripts/render_binder.py examples/sample-trip.json examples/sample-binder.md
+```
+
+This reads the sanitized sample trip and renders a Markdown binder from the templates in `templates/binder/`.
+
+## Current milestone
+
+The project can now produce a real artifact: a generated Markdown binder from structured trip JSON. That is the first working end-to-end slice of the system.

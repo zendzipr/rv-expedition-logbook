@@ -17,6 +17,12 @@
 - Add deterministic rule checks
 - Add more examples
 
+## Sprint 1.5: First working renderer
+
+- Generate a Markdown binder from `examples/sample-trip.json`
+- Commit a sanitized generated example at `examples/sample-binder.md`
+- Keep the renderer dependency-free for easy first use
+
 ## Sprint 3: Hermes workflow
 
 - Refine capture flows

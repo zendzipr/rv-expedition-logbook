@@ -26,7 +26,72 @@
       "provenance": {
         "source": "example",
         "confidence": 1.0
-      }
+      },
+      "drive_time_minutes": 270,
+      "weather": "Clear, mild, light mountain wind",
+      "arrival_notes": "Arrived before dusk and had an easy setup.",
+      "campground": {
+        "id": "sample-campground-001",
+        "name": "Sample Campground",
+        "location": "Western North Carolina",
+        "site": "Example Site 12",
+        "hookups": [
+          "50A",
+          "water",
+          "sewer"
+        ],
+        "connectivity": {
+          "Verizon": "usable",
+          "Starlink": "clear northern sky"
+        },
+        "rating": 4,
+        "would_return": true,
+        "notes": "Sanitized example campground with good access roads and quiet evenings."
+      },
+      "fuel_stops": [
+        {
+          "id": "sample-fuel-001",
+          "date": "2026-05-01",
+          "vendor": "Example Fuel",
+          "location": "Sample Town, VA",
+          "odometer": 12345,
+          "gallons": 42.5,
+          "total_cost": 165.75,
+          "price_per_gallon": 3.9,
+          "notes": "Sample fuel stop only."
+        }
+      ],
+      "expenses": [
+        {
+          "id": "sample-expense-001",
+          "date": "2026-05-01",
+          "category": "food",
+          "amount": 28.5,
+          "vendor": "Example BBQ",
+          "notes": "Sanitized restaurant expense."
+        }
+      ],
+      "maintenance_events": [
+        {
+          "id": "sample-maint-001",
+          "date": "2026-05-01",
+          "title": "Checked tire pressures",
+          "system": "tires",
+          "cost": 0,
+          "status": "completed",
+          "notes": "Routine pre-departure check.",
+          "follow_up": "Check again before return leg."
+        }
+      ],
+      "journal_entries": [
+        {
+          "date": "2026-05-01",
+          "body": "A smooth first travel day with good weather and an easy arrival.",
+          "lessons": [
+            "Leave early enough to arrive before dusk."
+          ]
+        }
+      ]
     }
   ],
   "provenance": {
