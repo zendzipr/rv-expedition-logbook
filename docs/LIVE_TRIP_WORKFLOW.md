@@ -78,6 +78,8 @@ python3 -m rv_logbook add-travel-day-note blue-ridge-test "Rainy mountain drivin
 python3 -m rv_logbook add-mileage-note blue-ridge-test "Mountain segment" 210 "Slow climbing miles with lower fuel economy than normal." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
 ```
 
+These binder-native commands are meant to let you capture the trip the way you actually experience it, instead of forcing everything through generic entry terminology.
+
 List follow-up questions the system still wants answered:
 
 ```bash
