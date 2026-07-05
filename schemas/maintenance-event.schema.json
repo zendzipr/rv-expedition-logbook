@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zendzipr.github.io/rv-expedition-logbook/schemas/maintenance-event.schema.json",
+  "title": "MaintenanceEvent",
+  "type": "object",
+  "required": [
+    "id",
+    "date",
+    "title",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "system": {
+      "type": "string"
+    },
+    "odometer": {
+      "type": "number",
+      "minimum": 0
+    },
+    "cost": {
+      "type": "number",
+      "minimum": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "scheduled",
+        "completed",
+        "monitoring"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "follow_up": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zendzipr.github.io/rv-expedition-logbook/schemas/expense.schema.json",
+  "title": "Expense",
+  "type": "object",
+  "required": [
+    "id",
+    "date",
+    "category",
+    "amount"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "travel_day_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "campground",
+        "fuel",
+        "food",
+        "maintenance",
+        "supplies",
+        "attraction",
+        "toll",
+        "other"
+      ]
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "vendor": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  },
+  "additionalProperties": true
+}

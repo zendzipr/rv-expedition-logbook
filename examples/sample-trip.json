@@ -1,0 +1,36 @@
+{
+  "id": "sample-trip-001",
+  "name": "Sample Blue Ridge Weekend",
+  "start_date": "2026-05-01",
+  "end_date": "2026-05-03",
+  "travelers": [
+    "Example Traveler"
+  ],
+  "summary": "A sanitized sample trip used for schema and template development.",
+  "travel_days": [
+    {
+      "id": "sample-day-001",
+      "trip_id": "sample-trip-001",
+      "date": "2026-05-01",
+      "origin": "Sample City, VA",
+      "destination": "Sample Campground, NC",
+      "miles": 210,
+      "route_notes": "Mountain grades required slower driving. This is not real private travel data.",
+      "highlights": [
+        "Good weather",
+        "Easy check-in"
+      ],
+      "lessons_learned": [
+        "Start earlier on Friday travel days."
+      ],
+      "provenance": {
+        "source": "example",
+        "confidence": 1.0
+      }
+    }
+  ],
+  "provenance": {
+    "source": "example",
+    "confidence": 1.0
+  }
+}

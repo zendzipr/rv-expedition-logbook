@@ -1,17 +1,42 @@
 # RV Expedition Logbook
 
-A comprehensive, open-source RV travel planner, expedition logbook, maintenance record, and keepsake.
+RV Expedition Logbook is a knowledge-first RV travel logging system.
 
-## Planned Sections
+It is not just a printable binder. The binder is one generated output from a structured travel knowledge model that can also produce Markdown reports, HTML pages, dashboards, statistics, and future mobile or web experiences.
 
-- Personal Information
-- Trip Planning
-- Travel Days
-- Campgrounds
-- Adventures
-- Maintenance
-- Finances
-- Memories
-- Reference
+## What lives in this repository
 
-This project is being developed in Markdown first so it can be converted to PDF, HTML, GitHub Pages, or printable binder pages.
+This repository contains reusable project assets:
+
+- Hermes skill instructions
+- Domain documentation
+- JSON Schemas
+- Markdown binder templates
+- Example non-personal data
+- Validation scripts and tests
+
+Personal travel history does **not** belong in this repository. Real trips, journals, ratings, expenses, and private notes belong in Hermes/Hindsight or another user-owned data store.
+
+## Sprint 1 contents
+
+```text
+docs/                         project design documents
+skills/rv-expedition-logbook/ Hermes skill and supporting references
+schemas/                      JSON Schemas for core domain objects
+templates/binder/             Markdown binder page templates
+examples/                     safe sample data
+scripts/                      validation tooling
+tests/                        lightweight validation tests
+```
+
+## Core principle
+
+Capture once. Reuse everywhere.
+
+A fuel stop, campground rating, travel-day note, or maintenance event should be captured once as structured knowledge and then reused in binders, reports, statistics, recommendations, and future interfaces.
+
+## Validate
+
+```bash
+python3 scripts/validate.py
+```

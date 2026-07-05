@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zendzipr.github.io/rv-expedition-logbook/schemas/fuel-stop.schema.json",
+  "title": "FuelStop",
+  "type": "object",
+  "required": [
+    "id",
+    "date"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "travel_day_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "vendor": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "odometer": {
+      "type": "number",
+      "minimum": 0
+    },
+    "gallons": {
+      "type": "number",
+      "minimum": 0
+    },
+    "total_cost": {
+      "type": "number",
+      "minimum": 0
+    },
+    "price_per_gallon": {
+      "type": "number",
+      "minimum": 0
+    },
+    "notes": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  },
+  "additionalProperties": true
+}

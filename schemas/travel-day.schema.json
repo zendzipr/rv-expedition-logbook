@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zendzipr.github.io/rv-expedition-logbook/schemas/travel-day.schema.json",
+  "title": "TravelDay",
+  "type": "object",
+  "required": [
+    "id",
+    "trip_id",
+    "date"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trip_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "origin": {
+      "type": "string"
+    },
+    "destination": {
+      "type": "string"
+    },
+    "miles": {
+      "type": "number",
+      "minimum": 0
+    },
+    "drive_time_minutes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "weather": {
+      "type": "string"
+    },
+    "route_notes": {
+      "type": "string"
+    },
+    "highlights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lessons_learned": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  },
+  "additionalProperties": true
+}
