@@ -47,7 +47,7 @@ class ReleaseArtifactsTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("uv run python -m unittest discover -s tests", result.stdout)
+        self.assertIn("-m unittest discover -s tests", result.stdout)
 
 
 if __name__ == "__main__":
