@@ -61,6 +61,12 @@ Add a structured entry that should appear in the live binder snapshot:
 python3 -m rv_logbook add-trip-entry blue-ridge-test meal "12 Bones Smokehouse" "Best ribs of the trip." --base-dir data
 ```
 
+Structured entries can also be tied to a date and a travel day:
+
+```bash
+python3 -m rv_logbook add-trip-entry blue-ridge-test fuel "Pilot fill-up" "Topped off before the climb." --date 2026-05-01 --travel-day-id stop-001 --base-dir data
+```
+
 List follow-up questions the system still wants answered:
 
 ```bash
@@ -89,7 +95,13 @@ python3 -m rv_logbook render-current-binder blue-ridge-test --base-dir data
 
 Each trip workspace includes a small SQLite database at `trip.db`.
 
-Today it stores trip notes so the system can accumulate live-trip observations over time. It is intended to expand to other captured facts such as meals, comments, stop details, mileage context, and follow-up questions.
+Today it stores:
+
+- trip notes
+- structured trip entries
+- final reflections
+
+Structured entries can carry binder-friendly metadata like an entry date and a related `travel_day_id`, so meals, fuel stops, mileage context, and stop commentary can be tied back to the right part of the trip.
 
 ## Live trip binder
 
@@ -103,6 +115,7 @@ During the trip, the user should be able to:
 - add meals and stop commentary
 - answer follow-up questions about the trip
 - regenerate the **current binder snapshot** at any time
+- capture structured sections such as meals, stops, campgrounds, travel notes, and fuel or mileage context
 
 ## Final binder
 

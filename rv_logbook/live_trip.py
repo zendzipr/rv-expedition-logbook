@@ -25,6 +25,15 @@ NOTE_FILES = {
 }
 
 ENTRY_TYPES = {"meal", "stop", "campground", "travel", "fuel", "mileage", "general"}
+SECTION_TITLES = {
+    "meal": "Meals",
+    "stop": "Stops",
+    "campground": "Campgrounds",
+    "travel": "Travel Notes",
+    "fuel": "Fuel & Mileage",
+    "mileage": "Fuel & Mileage",
+    "general": "General Notes",
+}
 
 QUESTION_RULES = [
     ("meal", "What meals were memorable on this part of the trip?"),
@@ -84,10 +93,17 @@ def init_trip_db(db_path: Path) -> None:
               entry_type text not null,
               title text not null,
               content text not null,
+              occurred_on text,
+              travel_day_id text,
               created_at text not null
             )
             """
         )
+        columns = {row[1] for row in conn.execute("pragma table_info(trip_entries)").fetchall()}
+        if "occurred_on" not in columns:
+            conn.execute("alter table trip_entries add column occurred_on text")
+        if "travel_day_id" not in columns:
+            conn.execute("alter table trip_entries add column travel_day_id text")
         conn.execute(
             """
             create table if not exists final_reflections (
@@ -147,7 +163,15 @@ def add_trip_note(base_dir: Path, trip_slug: str, note_type: str, content: str) 
     return note_path
 
 
-def add_trip_entry(base_dir: Path, trip_slug: str, entry_type: str, title: str, content: str) -> None:
+def add_trip_entry(
+    base_dir: Path,
+    trip_slug: str,
+    entry_type: str,
+    title: str,
+    content: str,
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> None:
     if entry_type not in ENTRY_TYPES:
         valid = ", ".join(sorted(ENTRY_TYPES))
         raise LiveTripError(f"unknown entry type '{entry_type}'. Valid types: {valid}")
@@ -155,8 +179,8 @@ def add_trip_entry(base_dir: Path, trip_slug: str, entry_type: str, title: str, 
     conn = sqlite3.connect(paths["db"])
     try:
         conn.execute(
-            "insert into trip_entries(entry_type, title, content, created_at) values (?, ?, ?, ?)",
-            (entry_type, title, content, utc_now()),
+            "insert into trip_entries(entry_type, title, content, occurred_on, travel_day_id, created_at) values (?, ?, ?, ?, ?, ?)",
+            (entry_type, title, content, occurred_on, travel_day_id, utc_now()),
         )
         conn.commit()
     finally:
@@ -176,14 +200,24 @@ def add_final_reflection(base_dir: Path, trip_slug: str, content: str) -> None:
         conn.close()
 
 
-def load_trip_entries(db_path: Path) -> list[tuple[str, str, str]]:
+def load_trip_entries(db_path: Path) -> list[dict[str, str | None]]:
     conn = sqlite3.connect(db_path)
     try:
-        return conn.execute(
-            "select entry_type, title, content from trip_entries order by id"
+        rows = conn.execute(
+            "select entry_type, title, content, occurred_on, travel_day_id from trip_entries order by id"
         ).fetchall()
     finally:
         conn.close()
+    return [
+        {
+            "entry_type": row[0],
+            "title": row[1],
+            "content": row[2],
+            "occurred_on": row[3],
+            "travel_day_id": row[4],
+        }
+        for row in rows
+    ]
 
 
 def load_final_reflections(db_path: Path) -> list[str]:
@@ -198,7 +232,7 @@ def load_final_reflections(db_path: Path) -> list[str]:
 def follow_up_questions(base_dir: Path, trip_slug: str) -> list[str]:
     paths = require_workspace(base_dir, trip_slug)
     entries = load_trip_entries(paths["db"])
-    have_types = {entry_type for entry_type, _, _ in entries}
+    have_types = {entry["entry_type"] for entry in entries}
 
     questions: list[str] = []
     for entry_type, question in QUESTION_RULES:
@@ -211,12 +245,30 @@ def render_live_sections(db_path: Path) -> str:
     entries = load_trip_entries(db_path)
     if not entries:
         return ""
-    lines = ["", "# Live Trip Entries", ""]
-    for entry_type, title, content in entries:
-        lines.append(f"## {entry_type.title()}: {title}")
+
+    grouped: dict[str, list[dict[str, str | None]]] = {}
+    for entry in entries:
+        section = SECTION_TITLES.get(entry["entry_type"] or "general", "General Notes")
+        grouped.setdefault(section, []).append(entry)
+
+    lines = [""]
+    for section in ["Meals", "Stops", "Campgrounds", "Travel Notes", "Fuel & Mileage", "General Notes"]:
+        section_entries = grouped.get(section, [])
+        if not section_entries:
+            continue
+        lines.append(f"# {section}")
         lines.append("")
-        lines.append(content)
-        lines.append("")
+        for entry in section_entries:
+            lines.append(f"## {entry['title']}")
+            lines.append("")
+            if entry.get("occurred_on"):
+                lines.append(f"Date: {entry['occurred_on']}")
+            if entry.get("travel_day_id"):
+                lines.append(f"Travel day: {entry['travel_day_id']}")
+            if entry.get("occurred_on") or entry.get("travel_day_id"):
+                lines.append("")
+            lines.append(entry["content"] or "")
+            lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 

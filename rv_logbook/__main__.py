@@ -47,6 +47,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_entry_parser.add_argument("entry_type", choices=["meal", "stop", "campground", "travel", "fuel", "mileage", "general"], help="structured entry category")
     add_entry_parser.add_argument("title", help="short entry title")
     add_entry_parser.add_argument("content", help="entry details")
+    add_entry_parser.add_argument("--date", dest="occurred_on", help="optional entry date in YYYY-MM-DD form")
+    add_entry_parser.add_argument("--travel-day-id", help="optional related travel day id")
     add_entry_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     questions_parser = subparsers.add_parser("trip-questions", help="list follow-up questions for a live trip workspace")
@@ -134,9 +136,25 @@ def add_trip_note_command(trip_slug: str, note_type: str, content: str, base_dir
     return 0
 
 
-def add_trip_entry_command(trip_slug: str, entry_type: str, title: str, content: str, base_dir: str = "data") -> int:
+def add_trip_entry_command(
+    trip_slug: str,
+    entry_type: str,
+    title: str,
+    content: str,
+    base_dir: str = "data",
+    occurred_on: str | None = None,
+    travel_day_id: str | None = None,
+) -> int:
     try:
-        add_trip_entry(Path(base_dir), trip_slug, entry_type, title, content)
+        add_trip_entry(
+            Path(base_dir),
+            trip_slug,
+            entry_type,
+            title,
+            content,
+            occurred_on=occurred_on,
+            travel_day_id=travel_day_id,
+        )
     except LiveTripError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -276,7 +294,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "add-trip-note":
         return add_trip_note_command(args.trip_slug, args.note_type, args.content, args.base_dir)
     if args.command == "add-trip-entry":
-        return add_trip_entry_command(args.trip_slug, args.entry_type, args.title, args.content, args.base_dir)
+        return add_trip_entry_command(
+            args.trip_slug,
+            args.entry_type,
+            args.title,
+            args.content,
+            args.base_dir,
+            args.occurred_on,
+            args.travel_day_id,
+        )
     if args.command == "trip-questions":
         return trip_questions_command(args.trip_slug, args.base_dir)
     if args.command == "add-final-reflection":

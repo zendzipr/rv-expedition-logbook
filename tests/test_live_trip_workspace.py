@@ -144,9 +144,91 @@ class LiveTripWorkspaceTest(unittest.TestCase):
         )
         self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
         binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
-        self.assertIn("Live Trip Entries", binder)
+        self.assertIn("# Meals", binder)
         self.assertIn("12 Bones Smokehouse", binder)
         self.assertIn("Best ribs of the trip.", binder)
+
+    def test_add_trip_entry_supports_date_and_travel_day_metadata(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        entry = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "rv_logbook",
+                "add-trip-entry",
+                "blue-ridge-test",
+                "fuel",
+                "Pilot fill-up",
+                "Topped off before the climb.",
+                "--date",
+                "2026-05-01",
+                "--travel-day-id",
+                "stop-001",
+                "--base-dir",
+                str(base_dir),
+            ],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(entry.returncode, 0, entry.stdout + entry.stderr)
+
+        conn = sqlite3.connect(trip_dir / "trip.db")
+        try:
+            rows = conn.execute("select entry_type, title, content, occurred_on, travel_day_id from trip_entries order by id").fetchall()
+        finally:
+            conn.close()
+        self.assertEqual(rows[-1], ("fuel", "Pilot fill-up", "Topped off before the climb.", "2026-05-01", "stop-001"))
+
+    def test_current_binder_groups_entries_into_binder_sections(self):
+        root = Path(__file__).resolve().parents[1]
+        temp_dir = Path(tempfile.mkdtemp())
+        base_dir = temp_dir / "data"
+        trip_dir = base_dir / "trips" / "blue-ridge-test"
+
+        create = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "create-live-trip", "blue-ridge-test", "examples/sample-rtw-export.json", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(create.returncode, 0, create.stdout + create.stderr)
+
+        for args in [
+            ["add-trip-entry", "blue-ridge-test", "meal", "12 Bones Smokehouse", "Best ribs of the trip.", "--base-dir", str(base_dir)],
+            ["add-trip-entry", "blue-ridge-test", "fuel", "Pilot fill-up", "Topped off before the climb.", "--date", "2026-05-01", "--travel-day-id", "stop-001", "--base-dir", str(base_dir)],
+        ]:
+            result = subprocess.run([sys.executable, "-m", "rv_logbook", *args], cwd=root, text=True, capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        render = subprocess.run(
+            [sys.executable, "-m", "rv_logbook", "render-current-binder", "blue-ridge-test", "--base-dir", str(base_dir)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(render.returncode, 0, render.stdout + render.stderr)
+        binder = (trip_dir / "output" / "current-binder.md").read_text(encoding="utf-8")
+        self.assertIn("# Meals", binder)
+        self.assertIn("# Fuel & Mileage", binder)
+        self.assertIn("Pilot fill-up", binder)
+        self.assertIn("Travel day: stop-001", binder)
 
     def test_trip_questions_reports_missing_follow_up_areas(self):
         root = Path(__file__).resolve().parents[1]
