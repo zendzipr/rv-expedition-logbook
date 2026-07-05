@@ -32,3 +32,9 @@ jobs:
 
       - name: Verify rendered binder exists
         run: test -s output/sample-binder.md
+
+      - name: Import sample fuel-stop CSV
+        run: python3 -m rv_logbook import-csv fuel-stop examples/sample-fuel-stops.csv output/fuel-stops.json
+
+      - name: Verify imported fuel-stop JSON exists
+        run: test -s output/fuel-stops.json

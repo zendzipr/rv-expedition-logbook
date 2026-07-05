@@ -1,0 +1,3 @@
+id,travel_day_id,date,category,amount,vendor,notes
+expense-001,sample-day-001,2026-05-01,food,28.5,Example BBQ,Sanitized restaurant expense.
+expense-002,sample-day-002,2026-05-02,campground,45,Example Campground,Sanitized overnight fee.
