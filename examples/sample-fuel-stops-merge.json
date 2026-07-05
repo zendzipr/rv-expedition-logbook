@@ -1,0 +1,14 @@
+[
+  {
+    "id": "fuel-stop-merge-sample-001",
+    "travel_day_id": "sample-day-001",
+    "date": "2026-05-01",
+    "vendor": "Merge Fuel",
+    "location": "Merge Town",
+    "odometer": 13000,
+    "gallons": 25.0,
+    "total_cost": 100.0,
+    "price_per_gallon": 4.0,
+    "notes": "Sample normalized fuel-stop record for merge testing."
+  }
+]

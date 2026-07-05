@@ -38,3 +38,12 @@ jobs:
 
       - name: Verify imported fuel-stop JSON exists
         run: test -s output/fuel-stops.json
+
+      - name: Merge sample fuel-stop records into trip
+        run: python3 -m rv_logbook merge-records fuel-stop examples/sample-trip.json examples/sample-fuel-stops-merge.json output/merged-trip.json
+
+      - name: Validate merged trip
+        run: python3 -m rv_logbook validate output/merged-trip.json --schema trip
+
+      - name: Verify merged trip exists
+        run: test -s output/merged-trip.json

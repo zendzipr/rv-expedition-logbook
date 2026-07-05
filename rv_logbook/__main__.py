@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from .importers import CsvImportError, import_csv, write_json
+from .merge import MergeError, merge_record_files
 from .render import BinderRenderError, fail, load_json, render_binder
 from .schema import SchemaValidationError, validate_file, validate_repository
 
@@ -25,6 +26,12 @@ def build_parser() -> argparse.ArgumentParser:
     import_parser.add_argument("csv_type", choices=["fuel-stop", "expense"], help="CSV import type")
     import_parser.add_argument("input", help="input CSV file")
     import_parser.add_argument("output", help="output JSON file")
+
+    merge_parser = subparsers.add_parser("merge-records", help="merge normalized records into a trip JSON file")
+    merge_parser.add_argument("record_type", choices=["fuel-stop", "expense"], help="record type to merge")
+    merge_parser.add_argument("trip", help="trip JSON file")
+    merge_parser.add_argument("records", help="records JSON array file")
+    merge_parser.add_argument("output", help="output merged trip JSON file")
 
     subparsers.add_parser("validate-repo", help="validate repository schemas and examples")
     return parser
@@ -65,6 +72,16 @@ def import_csv_command(csv_type: str, input_path: str, output_path: str) -> int:
     return 0
 
 
+def merge_records_command(record_type: str, trip_path: str, records_path: str, output_path: str) -> int:
+    try:
+        merge_record_files(record_type, Path(trip_path), Path(records_path), Path(output_path))
+    except MergeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Merged {record_type} records into {output_path}")
+    return 0
+
+
 def validate_repo_command() -> int:
     try:
         checked = validate_repository()
@@ -86,6 +103,8 @@ def main(argv: list[str] | None = None) -> int:
         return validate_command(args.input, args.schema)
     if args.command == "import-csv":
         return import_csv_command(args.csv_type, args.input, args.output)
+    if args.command == "merge-records":
+        return merge_records_command(args.record_type, args.trip, args.records, args.output)
     if args.command == "validate-repo":
         return validate_repo_command()
     parser.error(f"unknown command: {args.command}")
