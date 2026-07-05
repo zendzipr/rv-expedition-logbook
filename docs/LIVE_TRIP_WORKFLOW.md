@@ -135,6 +135,12 @@ Render the final binder as HTML:
 python3 -m rv_logbook render-final-binder-html blue-ridge-test --base-dir data
 ```
 
+Export a bundle of the trip binder outputs and notes:
+
+```bash
+python3 -m rv_logbook trip-export-bundle blue-ridge-test --base-dir data
+```
+
 ## Database
 
 Each trip workspace includes a small SQLite database at `trip.db`.

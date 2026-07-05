@@ -85,7 +85,11 @@ jobs:
           python3 -m rv_logbook render-current-binder-html ci-live-trip --base-dir output/live
           python3 -m rv_logbook render-final-binder-html ci-live-trip --base-dir output/live
 
-      - name: Verify live trip HTML binders exist
+      - name: Export live trip bundle
+        run: python3 -m rv_logbook trip-export-bundle ci-live-trip --base-dir output/live
+
+      - name: Verify live trip HTML binders and bundle exist
         run: |
           test -s output/live/trips/ci-live-trip/output/current-binder.html
           test -s output/live/trips/ci-live-trip/output/final-binder.html
+          test -s output/live/trips/ci-live-trip/output/trip-binder-bundle.zip

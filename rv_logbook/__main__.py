@@ -18,6 +18,7 @@ from .live_trip import (
     add_trip_entry,
     add_trip_note,
     create_live_trip,
+    export_trip_bundle,
     finalize_trip,
     follow_up_questions,
     render_current_binder,
@@ -166,6 +167,10 @@ def build_parser() -> argparse.ArgumentParser:
     render_final_html_parser = subparsers.add_parser("render-final-binder-html", help="render the final binder as HTML for a live trip workspace")
     render_final_html_parser.add_argument("trip_slug", help="trip workspace slug")
     render_final_html_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
+
+    export_bundle_parser = subparsers.add_parser("trip-export-bundle", help="package trip binder outputs and notes into a zip bundle")
+    export_bundle_parser.add_argument("trip_slug", help="trip workspace slug")
+    export_bundle_parser.add_argument("--base-dir", default="data", help="base data directory that contains the trips/ folder")
 
     render_html_parser = subparsers.add_parser("render-html", help="render an HTML trip report from trip JSON")
     render_html_parser.add_argument("input", help="input trip JSON file")
@@ -545,6 +550,16 @@ def render_final_binder_html_command(trip_slug: str, base_dir: str = "data") -> 
     return 0
 
 
+def trip_export_bundle_command(trip_slug: str, base_dir: str = "data") -> int:
+    try:
+        output_path = export_trip_bundle(Path(base_dir), trip_slug)
+    except LiveTripError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Exported trip bundle: {output_path}")
+    return 0
+
+
 def render_html_command(input_path: str, output_path: str) -> int:
     trip = load_json(Path(input_path))
     try:
@@ -732,6 +747,8 @@ def main(argv: list[str] | None = None) -> int:
         return render_current_binder_html_command(args.trip_slug, args.base_dir)
     if args.command == "render-final-binder-html":
         return render_final_binder_html_command(args.trip_slug, args.base_dir)
+    if args.command == "trip-export-bundle":
+        return trip_export_bundle_command(args.trip_slug, args.base_dir)
     if args.command == "render-html":
         return render_html_command(args.input, args.output)
     if args.command == "validate":

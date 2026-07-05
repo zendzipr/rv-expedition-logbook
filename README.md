@@ -122,6 +122,7 @@ python3 -m rv_logbook finalize-trip <trip-slug> --base-dir data
 python3 -m rv_logbook render-current-binder <trip-slug> --base-dir data
 python3 -m rv_logbook render-current-binder-html <trip-slug> --base-dir data
 python3 -m rv_logbook render-final-binder-html <trip-slug> --base-dir data
+python3 -m rv_logbook trip-export-bundle <trip-slug> --base-dir data
 ```
 
 These binder-native commands are there so you can capture what actually happened on the road without translating your trip into database jargon first.

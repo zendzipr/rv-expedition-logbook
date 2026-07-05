@@ -18,6 +18,7 @@ class CiWorkflowTest(unittest.TestCase):
         self.assertIn("python3 -m rv_logbook ingest-csv fuel-stop examples/sample-trip.json examples/sample-fuel-stops-single.csv", content)
         self.assertIn("python3 -m rv_logbook render-current-binder-html ci-live-trip", content)
         self.assertIn("python3 -m rv_logbook render-final-binder-html ci-live-trip", content)
+        self.assertIn("python3 -m rv_logbook trip-export-bundle ci-live-trip", content)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import zipfile
 from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
@@ -625,3 +626,19 @@ def render_final_binder_html(base_dir: Path, trip_slug: str) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(html, encoding="utf-8")
     return output_path
+
+
+def export_trip_bundle(base_dir: Path, trip_slug: str) -> Path:
+    paths = require_workspace(base_dir, trip_slug)
+    bundle_path = paths["output"] / "trip-binder-bundle.zip"
+    bundle_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with zipfile.ZipFile(bundle_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.write(paths["trip_json"], arcname="trip.json")
+        for note_file in sorted(paths["notes"].glob("*.md")):
+            archive.write(note_file, arcname=f"notes/{note_file.name}")
+        for output_file in sorted(paths["output"].glob("*.md")) + sorted(paths["output"].glob("*.html")):
+            if output_file.name == bundle_path.name:
+                continue
+            archive.write(output_file, arcname=f"output/{output_file.name}")
+    return bundle_path
