@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rv-expedition-logbook"
+version = "0.2.0"
+description = "Knowledge-first RV expedition logbook tools for structured trip data and binder generation."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+  { name = "Hermes Agent" }
+]
+keywords = ["rv", "travel", "logbook", "binder", "hermes"]
+dependencies = [
+  "jsonschema>=4.23.0"
+]
+
+[project.scripts]
+rv-logbook = "rv_logbook.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["rv_logbook"]

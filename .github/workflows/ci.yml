@@ -18,6 +18,9 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install package
+        run: python3 -m pip install -e .
+
       - name: Validate repository assets
         run: python3 scripts/validate.py
 

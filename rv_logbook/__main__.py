@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from .render import BinderRenderError, fail, load_json, render_binder
+from .schema import SchemaValidationError, validate_file, validate_repository
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -14,6 +15,12 @@ def build_parser() -> argparse.ArgumentParser:
     render_parser = subparsers.add_parser("render", help="render a Markdown binder from trip JSON")
     render_parser.add_argument("input", help="input trip JSON file")
     render_parser.add_argument("output", help="output Markdown file")
+
+    validate_parser = subparsers.add_parser("validate", help="validate a JSON file against a project schema")
+    validate_parser.add_argument("input", help="input JSON file")
+    validate_parser.add_argument("--schema", default="trip", help="schema name, e.g. trip, travel-day, campground")
+
+    subparsers.add_parser("validate-repo", help="validate repository schemas and examples")
     return parser
 
 
@@ -30,11 +37,37 @@ def render_command(input_path: str, output_path: str) -> int:
     return 0
 
 
+def validate_command(input_path: str, schema_name: str) -> int:
+    try:
+        validate_file(Path(input_path), schema_name)
+    except SchemaValidationError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Valid: {input_path} matches {schema_name}")
+    return 0
+
+
+def validate_repo_command() -> int:
+    try:
+        checked = validate_repository()
+    except SchemaValidationError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    for item in checked:
+        print(f"OK schema: {item}")
+    print("Repository validation complete.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "render":
         return render_command(args.input, args.output)
+    if args.command == "validate":
+        return validate_command(args.input, args.schema)
+    if args.command == "validate-repo":
+        return validate_repo_command()
     parser.error(f"unknown command: {args.command}")
     return 2
 

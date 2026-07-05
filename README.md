@@ -37,8 +37,17 @@ A fuel stop, campground rating, travel-day note, or maintenance event should be 
 
 ## Validate
 
+Install the package in editable mode first:
+
+```bash
+python3 -m pip install -e .
+```
+
+Then run:
+
 ```bash
 python3 scripts/validate.py
+python3 -m rv_logbook validate examples/sample-trip.json --schema trip
 python3 -m unittest discover -s tests
 ```
 
@@ -58,7 +67,7 @@ This reads the sanitized sample trip and renders a Markdown binder from the temp
 
 ## Continuous integration
 
-GitHub Actions runs validation, unit tests, and sample binder rendering on pushes and pull requests to `main`.
+GitHub Actions installs the package, runs JSON Schema validation, runs unit tests, and renders the sample binder on pushes and pull requests to `main`.
 
 ## Current milestone
 

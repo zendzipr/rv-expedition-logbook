@@ -1,28 +1,22 @@
 #!/usr/bin/env python3
-"""Lightweight repository validation with no third-party dependencies."""
+"""Validate repository assets, schemas, examples, skill, and templates."""
 from __future__ import annotations
 
-import json
 import re
 import sys
 from pathlib import Path
 from typing import NoReturn
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from rv_logbook.schema import SchemaValidationError, validate_repository
 
 
 def fail(message: str) -> NoReturn:
     print(f"ERROR: {message}")
     raise SystemExit(1)
-
-
-def validate_json_files() -> None:
-    for path in sorted((ROOT / "schemas").glob("*.json")) + sorted((ROOT / "examples").glob("*.json")):
-        try:
-            json.loads(path.read_text(encoding="utf-8"))
-        except Exception as exc:  # noqa: BLE001 - validation script should report any parse issue
-            fail(f"invalid JSON in {path.relative_to(ROOT)}: {exc}")
-        print(f"OK json: {path.relative_to(ROOT)}")
 
 
 def validate_skill() -> None:
@@ -65,7 +59,12 @@ def validate_templates() -> None:
 
 
 def main() -> int:
-    validate_json_files()
+    try:
+        checked = validate_repository()
+    except SchemaValidationError as exc:
+        fail(str(exc))
+    for item in checked:
+        print(f"OK schema: {item}")
     validate_skill()
     validate_templates()
     print("Validation complete.")
